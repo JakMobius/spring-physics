@@ -1,11 +1,12 @@
 #pragma once
 
-#include <SFML/Window/Keyboard.hpp>
-#include "../utils/vec3.hpp"
-#include "../utils/vec2.hpp"
 #include "../general-app.hpp"
 #include "../graphics/camera.hpp"
+#include "../utils/vec2.hpp"
+#include "../utils/vec3.hpp"
 #include "camera/camera-controller.hpp"
+#include "joystick.hpp"
+#include <SFML/Window/Keyboard.hpp>
 
 class UserController {
     GeneralApp* app;

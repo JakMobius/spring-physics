@@ -19,6 +19,7 @@
 class SpringPhysicsApp : public GeneralApp {
 
     UserController m_user_controller { (GeneralApp*) this };
+    Joystick m_joystick {0x46d, 0xc286};
 
     std::unique_ptr<World> m_world {};
     std::unique_ptr<PerspectiveCamera> m_camera {};
@@ -27,7 +28,8 @@ class SpringPhysicsApp : public GeneralApp {
 
     Graphics::GeometryObject* object = nullptr;
 
-    Vec3f m_input_airplane_controls {};
+    Vec3f m_joystick_airplane_controls {};
+    Vec3f m_keyboard_input_airplane_controls{};
     Vec3f m_real_airplane_controls {};
 
     Graphics::SceneTexture* m_runway_texture = nullptr;
@@ -40,7 +42,8 @@ class SpringPhysicsApp : public GeneralApp {
     void clear_window();
 
     bool m_free_camera = false;
-    float m_throttle = 0.0f;
+    float m_keyboard_throttle = 0.0f;
+    float m_joystick_throttle = 0.0f;
 
 public:
 
@@ -56,4 +59,5 @@ public:
     void on_key_release(sf::Keyboard::Key key) override;
 
     void build_model(const Matrix4f& transform);
+    void update_joystick();
 };
