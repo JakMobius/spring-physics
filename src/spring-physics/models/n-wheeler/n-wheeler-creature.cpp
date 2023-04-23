@@ -45,13 +45,13 @@ NWheelerCreature::NWheelerCreature(World *world, const Matrix4f& transform): m_w
         builder.spring(left_wheel_steering, right_wheel_steering);
 
         if(i == 1) {
-            builder.jet(old_frame, frame_start, 40.0f);
-            builder.jet(old_frame + 1, frame_start + 1, 40.0f);
+            builder.jet(old_frame, frame_start, 120.0f);
+            builder.jet(old_frame + 1, frame_start + 1, 120.0f);
         }
 
         if(i == m_axles - 1) {
-            builder.jet(frame_start, old_frame, 40.0f);
-            builder.jet(frame_start + 1, old_frame + 1, 40.0f);
+            builder.jet(frame_start, old_frame, 120.0f);
+            builder.jet(frame_start + 1, old_frame + 1, 120.0f);
         }
 //
         if(i > 0) {

@@ -57,13 +57,13 @@ int TrainCreature::build_locomotive(ModelBuilder::Builder &builder) {
         int frame_start = build_axis(x, builder);
 
         if(i == 1) {
-            builder.jet(old_frame, frame_start, 40.0f);
-            builder.jet(old_frame + 1, frame_start + 1, 40.0f);
+            builder.jet(old_frame, frame_start, 120.0f);
+            builder.jet(old_frame + 1, frame_start + 1, 120.0f);
         }
 
         if(i == m_locomotive_axles - 1) {
-            builder.jet(frame_start, old_frame, 40.0f);
-            builder.jet(frame_start + 1, old_frame + 1, 40.0f);
+            builder.jet(frame_start, old_frame, 120.0f);
+            builder.jet(frame_start + 1, old_frame + 1, 120.0f);
         }
 
         m_steering_springs.push_back(builder.spring(frame_start + 6, frame_start + 1));

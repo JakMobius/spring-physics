@@ -237,8 +237,8 @@ void SpringPhysicsApp::on_key_release(sf::Keyboard::Key key) {
 }
 
 void SpringPhysicsApp::build_model(const Matrix4f& transform) {
-//    m_creature = std::make_unique<AirplaneCreature>(m_world.get(), transform);
+    m_creature = std::make_unique<AirplaneCreature>(m_world.get(), transform);
 //    m_creature = std::make_unique<CarCreature>(m_world.get(), transform);
 //    m_creature = std::make_unique<NWheelerCreature>(m_world.get(), transform);
-    m_creature = std::make_unique<TrainCreature>(m_world.get(), transform);
+//    m_creature = std::make_unique<TrainCreature>(m_world.get(), transform);
 }

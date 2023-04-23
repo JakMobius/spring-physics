@@ -18,7 +18,7 @@ public:
     float m_throttle = 0.0f;
     float m_engine_power = 10.0f;
 
-    int m_axles = 40;
+    int m_axles = 30;
 
     std::vector<int> m_steering_springs;
 

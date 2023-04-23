@@ -28,7 +28,7 @@ public:
     float m_throttle = 0.0f;
     float m_engine_power = 10.0f;
 
-    int m_wagons = 20;
+    int m_wagons = 40;
     int m_locomotive_axles = 4;
 
     float m_frame_width = 2.0f;
