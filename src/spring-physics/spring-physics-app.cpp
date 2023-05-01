@@ -262,17 +262,18 @@ void SpringPhysicsApp::build_model(const Matrix4f &transform) {
 }
 void SpringPhysicsApp::update_joystick() {
 
-  if (!m_joystick.ready()) {
+  if (!sf::Joystick::isConnected(0)) {
     m_joystick_throttle = 0.0f;
     m_joystick_airplane_controls.set(0, 0.0f);
     m_joystick_airplane_controls.set(1, 0.0f);
     return;
   }
 
-  m_joystick.read();
-  auto buffer = m_joystick.get_buffer();
+  float x = sf::Joystick::getAxisPosition(0, sf::Joystick::X) / 100.0f;
+  float y = sf::Joystick::getAxisPosition(0, sf::Joystick::Y) / 100.0f;
+  float throttle = (sf::Joystick::getAxisPosition(0, sf::Joystick::V) + 100) / 200.0f;
 
-  m_joystick_airplane_controls.set(0, (float)(buffer[0] - 128) / 128.0f);
-  m_joystick_airplane_controls.set(1, (float)(buffer[1] - 128) / 128.0f);
-  m_joystick_throttle = (float)(255 - buffer[5]) / 255.0f;
+  m_joystick_airplane_controls.set(0, x);
+  m_joystick_airplane_controls.set(1, y);
+  m_joystick_throttle = throttle;
 }

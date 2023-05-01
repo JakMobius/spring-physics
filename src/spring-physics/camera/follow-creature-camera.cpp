@@ -1,7 +1,15 @@
 
 #include "follow-creature-camera.hpp"
+#include <SFML/Window/Joystick.hpp>
 
 void FollowCreatureCamera::tick(float delta_time) {
+
+    float gamepadX = -sf::Joystick::getAxisPosition(0, sf::Joystick::Z) / 100.0f;
+    float gamepadY = -sf::Joystick::getAxisPosition(0, sf::Joystick::R) / 100.0f;
+
+    Vec3f camera_speed_vector = {gamepadX, gamepadY, 0};
+    camera_speed_vector += m_camera_speed;
+
     Vec3f creature_position = m_creature->get_camera_binding_point();
 
     Vec3f delta = creature_position - m_old_creature_position;
@@ -38,9 +46,9 @@ void FollowCreatureCamera::tick(float delta_time) {
 
     m_camera->set_pitch_yaw(pitch, camera_angle);
 
-    m_view_angle += m_camera_speed.x * delta_time * m_rotation_speed;
-    m_camera_distance += m_camera_speed.z * delta_time * m_speed;
-    m_offset.y += m_camera_speed.y * delta_time * m_speed;
+    m_view_angle += camera_speed_vector.x * delta_time * m_rotation_speed;
+    m_camera_distance += camera_speed_vector.z * delta_time * m_speed;
+    m_offset.y += camera_speed_vector.y * delta_time * m_speed;
 }
 
 void FollowCreatureCamera::on_key_press(sf::Keyboard::Key key) {

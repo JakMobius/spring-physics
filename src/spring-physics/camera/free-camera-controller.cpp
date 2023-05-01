@@ -1,9 +1,17 @@
 
 
 #include "free-camera-controller.hpp"
+#include <SFML/Window/Joystick.hpp>
 
 void FreeCameraController::tick(float delta_time) {
-    Vec3f camera_space_speed = m_camera_speed_vector * m_camera_speed * delta_time;
+
+    float gamepadX = -sf::Joystick::getAxisPosition(0, sf::Joystick::Z) / 100.0f;
+    float gamepadY = -sf::Joystick::getAxisPosition(0, sf::Joystick::R) / 100.0f;
+
+    Vec3f camera_speed_vector = {gamepadX, gamepadY, 0};
+    camera_speed_vector += m_camera_speed_vector;
+
+    Vec3f camera_space_speed = camera_speed_vector * m_camera_speed * delta_time;
     Vec3f camera_speed = {0, 0, 0};
 
     Vec3f camera_front_direction = m_camera->get_direction();

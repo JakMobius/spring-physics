@@ -5,7 +5,6 @@
 #include "../utils/vec2.hpp"
 #include "../utils/vec3.hpp"
 #include "camera/camera-controller.hpp"
-#include "joystick.hpp"
 #include <SFML/Window/Keyboard.hpp>
 
 class UserController {

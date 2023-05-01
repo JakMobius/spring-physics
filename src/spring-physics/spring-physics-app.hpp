@@ -19,7 +19,6 @@
 class SpringPhysicsApp : public GeneralApp {
 
     UserController m_user_controller { (GeneralApp*) this };
-    Joystick m_joystick {0x46d, 0xc286};
 
     std::unique_ptr<World> m_world {};
     std::unique_ptr<PerspectiveCamera> m_camera {};
