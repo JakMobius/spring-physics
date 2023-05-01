@@ -138,8 +138,8 @@ Matrix4<ValueType> Matrix4<ValueType>::rotation_z_matrix(ValueType angle) {
 template<typename ValueType>
 void Matrix4<ValueType>::set_projection_matrix(ValueType fov, ValueType aspect, ValueType near, ValueType far) {
 
-    ValueType y_scale = 1.0 / tan(fov / 2);
-    ValueType x_scale = y_scale / aspect;
+    ValueType y_scale = -1.0 / tan(fov / 2);
+    ValueType x_scale = -y_scale / aspect;
     ValueType dist = near - far;
 
     set({
@@ -155,7 +155,7 @@ void Matrix4<ValueType>::set_orthogonal_matrix(ValueType left, ValueType right, 
 
     set({
         2.0f / (right - left), 0,                     0,                   0,
-        0,                     2.0f / (top - bottom), 0,                   0,
+        0,                     -2.0f / (top - bottom), 0,                   0,
         0,                     0,                     -2.0f / (far - near),0,
         0,                     0,                     0,                   1
     });
@@ -187,7 +187,7 @@ void Matrix4<ValueType>::reset() {
 }
 
 template<typename ValueType>
-Matrix4<ValueType> Matrix4<ValueType>::inverse() const{
+Matrix4<ValueType> Matrix4<ValueType>::inverse() const {
     ValueType a_2323 = m_data[2 * 4 + 2] * m_data[3 * 4 + 3] - m_data[2 * 4 + 3] * m_data[3 * 4 + 2];
     ValueType a_1323 = m_data[2 * 4 + 1] * m_data[3 * 4 + 3] - m_data[2 * 4 + 3] * m_data[3 * 4 + 1];
     ValueType a_1223 = m_data[2 * 4 + 1] * m_data[3 * 4 + 2] - m_data[2 * 4 + 2] * m_data[3 * 4 + 1];

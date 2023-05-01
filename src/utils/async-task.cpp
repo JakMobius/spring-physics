@@ -1,6 +1,3 @@
-//
-// Created by Артем on 06.02.2022.
-//
 
 #include "async-task.hpp"
 

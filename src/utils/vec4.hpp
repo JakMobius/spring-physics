@@ -13,7 +13,6 @@
 
 #include <cmath>
 #include <iostream>
-#include <SFML/Graphics/Color.hpp>
 #include "matrix4.hpp"
 
 template<typename T>

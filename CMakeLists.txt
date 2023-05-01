@@ -1,17 +1,21 @@
-cmake_minimum_required(VERSION 3.21)
-project(opengl_flying_sim)
-
+cmake_minimum_required(VERSION 3.20)
+project(etna-spring-physics)
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
 
-find_package(OpenGL REQUIRED)
-find_package(GLEW REQUIRED)
-find_package(SFML 2.5 COMPONENTS graphics REQUIRED)
-find_package(FreeImage REQUIRED)
+add_subdirectory(lib)
 
+find_package(GLFW REQUIRED)
+find_package(Vulkan REQUIRED)
+
+set(CMAKE_CXX_FLAGS "-O0 -fsanitize=address")
 set(CMAKE_CXX_STANDARD 20)
 
-set(CMAKE_CXX_FLAGS "-O3 -fsanitize=address")
+message(STATUS "GLFW_INCLUDE_DIR: ${GLFW_INCLUDE_DIR}")
+message(STATUS "GLFW_LIBRARY: ${GLFW_LIBRARY}")
+message(STATUS "Vulkan_INCLUDE_DIR: ${Vulkan_INCLUDE_DIR}")
+message(STATUS "Vulkan_LIBRARY: ${Vulkan_LIBRARY}")
+
 file(GLOB_RECURSE files "${CMAKE_SOURCE_DIR}/src/*.cpp" "${CMAKE_SOURCE_DIR}/src/*.hpp")
-add_executable(opengl_flying_sim ${files})
-target_link_libraries(opengl_flying_sim sfml-graphics sfml-audio GLEW::GLEW OpenGL::GL ${FREEIMAGE_LIBRARIES})
-include_directories(opengl_flying_sim ${GLEW_INCLUDE_DIRS} ${GLUT_INCLUDE_DIRS} ${SFML_INCLUDE_DIRS} ${FREEIMAGE_INCLUDE_DIRS})
+add_executable(etna-spring-physics ${files})
+include_directories(etna-spring-physics lib/etna/include ${GLFW_INCLUDE_DIR} ${Vulkan_INCLUDE_DIR})
+target_link_libraries(etna-spring-physics Etna ${GLFW_LIBRARY} Vulkan::Vulkan)

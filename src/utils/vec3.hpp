@@ -69,10 +69,6 @@ struct Vec3 {
         return Vec3 {res};
     }
 
-    inline T sum() {
-        return m_content[0] + m_content[1] + m_content[2];
-    }
-
     void set(int index, T y) { m_content[index] = y; }
 
     T operator[](const int i) const { return m_content[i]; }
