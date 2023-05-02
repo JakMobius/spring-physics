@@ -1,12 +1,6 @@
 
 #include "shadow-map-generation-stage.hpp"
 
-void ShadowMapGenerationStage::cleanup_pipeline() {
-    m_pipeline.destroy();
-    m_pipeline_layout.destroy();
-    m_render_pass.destroy();
-}
-
 void ShadowMapGenerationStage::create_depth_image() {
     auto depth_format = m_ctx.find_depth_format();
     auto& window = m_ctx.m_gpu_window;
@@ -78,14 +72,6 @@ void ShadowMapGenerationStage::create_render_pass() {
     render_pass_factory.get_subpass_descriptions().assign({subpass});
     render_pass_factory.get_subpass_dependency_descriptions().assign({dependency});
     m_render_pass = render_pass_factory.create(&window.get_device());
-
-    VK::FramebufferFactory framebuffer_factory;
-    framebuffer_factory.set_size(m_shadow_map_size);
-
-    for (int i = 0; i < m_layers; i++) {
-        framebuffer_factory.get_attachments() = {m_image_layer_views[i]};
-        m_framebuffers.push_back(framebuffer_factory.create(m_render_pass));
-    }
 }
 
 void ShadowMapGenerationStage::create_graphics_pipeline() {
@@ -133,11 +119,6 @@ void ShadowMapGenerationStage::create_graphics_pipeline() {
 
     m_pipeline_layout = VK::PipelineLayout::create(&window.get_device(), descriptors, push_constants);
     m_pipeline = pipeline_factory.create(m_pipeline_layout, m_render_pass);
-}
-
-void ShadowMapGenerationStage::create_pipeline() {
-    create_render_pass();
-    create_graphics_pipeline();
 }
 
 void ShadowMapGenerationStage::record_command_buffer(VK::CommandBuffer& command_buffer) {
@@ -193,5 +174,21 @@ void ShadowMapGenerationStage::update_push_constants() {
         memcpy(&m_push_constants[i].matrix, &m_ctx.m_shadow_mapping_matrix.m_data, sizeof(m_ctx.m_shadow_mapping_matrix.m_data));
 
         m_push_constants[i].shadow_map_level = i;
+    }
+}
+
+void ShadowMapGenerationStage::initialize() {
+    create_render_pass();
+    create_graphics_pipeline();
+    create_framebuffers();
+}
+
+void ShadowMapGenerationStage::create_framebuffers() {
+    VK::FramebufferFactory framebuffer_factory;
+    framebuffer_factory.set_size(m_shadow_map_size);
+
+    for (int i = 0; i < m_layers; i++) {
+        framebuffer_factory.get_attachments() = {m_image_layer_views[i]};
+        m_framebuffers.push_back(framebuffer_factory.create(m_render_pass));
     }
 }

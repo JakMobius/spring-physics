@@ -1,8 +1,6 @@
 #pragma once
 
 #include "window.hpp"
-#include "simple-swapchain-manager.hpp"
-#include <etna/swapchain-manager.hpp>
 #include <etna/basic-attachment-manager.hpp>
 #include <etna/command-queue/command-queue-pool.hpp>
 #include <etna/vk-wrappers/command-buffer/vk-command-pool.hpp>

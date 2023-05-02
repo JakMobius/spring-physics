@@ -2,18 +2,11 @@
 #include "particles-stage.hpp"
 #include "../../../world/particle-vertex.hpp"
 
-void ParticlesStage::cleanup_pipeline() {
-    m_pipeline.destroy();
-    m_pipeline_layout.destroy();
-    m_render_pass.destroy();
-}
-
 void ParticlesStage::create_render_pass() {
-    auto swapchain_manager = m_ctx.m_swapchain_manager.get();
     auto depth_format = m_ctx.find_depth_format();
     auto& window = m_ctx.m_gpu_window;
 
-    VK::Attachment color_attachment{swapchain_manager->get_swapchain_format().format};
+    VK::Attachment color_attachment{m_ctx.m_surface_format.format};
     color_attachment.set_samples(m_ctx.m_msaa_samples);
     color_attachment.set_initial_layout(VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
     color_attachment.set_load_store_operations(VK_ATTACHMENT_LOAD_OP_LOAD, VK_ATTACHMENT_STORE_OP_STORE);
@@ -49,22 +42,11 @@ void ParticlesStage::create_render_pass() {
     render_pass_factory.get_subpass_descriptions().assign({subpass});
     render_pass_factory.get_subpass_dependency_descriptions().assign({dependency});
     m_render_pass = render_pass_factory.create(&window.get_device());
-
-    VK::FramebufferFactory framebuffer_factory;
-    framebuffer_factory.set_size(swapchain_manager->get_swapchain_extent());
-
-    auto& attachments = framebuffer_factory.get_attachments();
-
-    attachments.push_back(m_ctx.m_color_image->get_view());
-    attachments.push_back(m_ctx.m_depth_image->get_view());
-
-    m_framebuffer = framebuffer_factory.create(m_render_pass);
 }
 
 void ParticlesStage::create_graphics_pipeline() {
     auto& window = m_ctx.m_gpu_window;
     auto device = &window.get_device();
-    auto swapchain_manager = m_ctx.m_swapchain_manager.get();
 
     auto vertex_shader = VK::ShaderModule::from_file(device, "resources/shaders/particles/vert.spv");
     auto fragment_shader = VK::ShaderModule::from_file(device, "resources/shaders/particles/frag.spv");
@@ -77,8 +59,8 @@ void ParticlesStage::create_graphics_pipeline() {
     vertex_array_binding.add_attribute(ParticleVertex::position_attribute);
     vertex_array_binding.add_attribute(ParticleVertex::color_attribute);
 
-    pipeline_factory.m_viewport_state.add_viewport(VK::Viewport(swapchain_manager->get_swapchain_extent()));
-    pipeline_factory.m_viewport_state.add_scissor(VkRect2D{{0, 0}, swapchain_manager->get_swapchain_extent()});
+    pipeline_factory.m_viewport_state.add_viewport(VK::Viewport(m_ctx.m_swapchain_extent));
+    pipeline_factory.m_viewport_state.add_scissor(VkRect2D{{0, 0}, m_ctx.m_swapchain_extent});
 
     pipeline_factory.m_rasterization_state.set_cull_mode(VK_CULL_MODE_BACK_BIT);
     pipeline_factory.m_rasterization_state.set_front_face(VK_FRONT_FACE_COUNTER_CLOCKWISE);
@@ -114,8 +96,8 @@ void ParticlesStage::create_graphics_pipeline() {
     m_pipeline = pipeline_factory.create(m_pipeline_layout, m_render_pass);
 }
 
-void ParticlesStage::create_pipeline() {
-    create_render_pass();
+void ParticlesStage::handle_swapchain_update() {
+    create_framebuffer();
     create_graphics_pipeline();
 }
 
@@ -134,11 +116,9 @@ void ParticlesStage::record_command_buffer(VK::CommandBuffer& command_buffer) {
     VkBuffer vertex_buffers[] = {vertex_buffer->get_buffer()->get_buffer().get_handle()};
     VkDeviceSize offsets[] = {0};
 
-    auto swapchain_manager = m_ctx.m_swapchain_manager.get();
-
     VK::RenderPassBeginInfo main_render_pass_begin_info(m_render_pass);
     main_render_pass_begin_info.set_framebuffer(m_framebuffer);
-    main_render_pass_begin_info.get_render_area().extent = swapchain_manager->get_swapchain_extent();
+    main_render_pass_begin_info.get_render_area().extent = m_ctx.m_swapchain_extent;
     main_render_pass_begin_info.set_clear_values(clear_values);
 
     command_buffer.begin_render_pass(main_render_pass_begin_info, VK_SUBPASS_CONTENTS_INLINE);
@@ -165,4 +145,22 @@ void ParticlesStage::update_push_constants() {
 
 void ParticlesStage::prepare_for_frame() {
     update_push_constants();
+}
+
+void ParticlesStage::initialize() {
+    create_render_pass();
+    create_graphics_pipeline();
+    create_framebuffer();
+}
+
+void ParticlesStage::create_framebuffer() {
+    VK::FramebufferFactory framebuffer_factory;
+    framebuffer_factory.set_size(m_ctx.m_swapchain_extent);
+
+    auto& attachments = framebuffer_factory.get_attachments();
+
+    attachments.push_back(m_ctx.m_color_image->get_view());
+    attachments.push_back(m_ctx.m_depth_image->get_view());
+
+    m_framebuffer = framebuffer_factory.create(m_render_pass);
 }

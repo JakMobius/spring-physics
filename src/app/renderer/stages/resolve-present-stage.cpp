@@ -5,17 +5,14 @@
 #include "../../../world/particle-vertex.hpp"
 #include "particles-stage.hpp"
 
-void ResolvePresentStage::cleanup_pipeline() {
-}
-
-void ResolvePresentStage::create_pipeline() {
+void ResolvePresentStage::handle_swapchain_update() {
 }
 
 void ResolvePresentStage::record_command_buffer(VK::CommandBuffer& command_buffer) {
 
     auto swapchain_image_index = m_ctx.m_swapchain_image_index;
-    auto swapchain_image = m_ctx.m_swapchain_manager->get_swapchain_images()[swapchain_image_index].m_image;
-    auto swapchain_extent = m_ctx.m_swapchain_manager->get_swapchain_extent();
+    auto swapchain_image = m_ctx.m_swapchain_images[swapchain_image_index];
+    auto swapchain_extent = m_ctx.m_swapchain_extent;
     VkExtent3D swapchain_extent_3d{swapchain_extent.width, swapchain_extent.height, 1};
 
     VK::ImageMemoryBarrier{m_ctx.m_color_image->get_image()}

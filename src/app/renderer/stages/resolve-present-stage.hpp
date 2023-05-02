@@ -7,8 +7,7 @@ class ResolvePresentStage : public Stage {
 public:
     explicit ResolvePresentStage(RenderingContext& ctx) : m_ctx(ctx) {}
 
-    void cleanup_pipeline() override;
-    void create_pipeline() override;
+    void handle_swapchain_update() override;
     void record_command_buffer(VK::CommandBuffer& command_buffer) override;
 
 private:

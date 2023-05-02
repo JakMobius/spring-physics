@@ -14,18 +14,21 @@ void BaseRenderer::prepare_for_frame() {
     }
 }
 
-void BaseRenderer::cleanup_pipeline() {
+void BaseRenderer::handle_swapchain_update() {
     for(auto stage : m_stages) {
-        stage->cleanup_pipeline();
-    }
-}
-
-void BaseRenderer::create_pipeline() {
-    for(auto stage : m_stages) {
-        stage->create_pipeline();
+        stage->handle_swapchain_update();
     }
 }
 
 void BaseRenderer::initialize() {
-    create_pipeline();
+    for(auto stage : m_stages) {
+        stage->initialize();
+    }
+    handle_swapchain_update();
+}
+
+void BaseRenderer::deinitialize() {
+    for(auto stage : m_stages) {
+        stage->deinitialize();
+    }
 }

@@ -39,7 +39,7 @@ public:
     UnownedInstanceResource& operator=(UnownedInstanceResource&& move_assign) noexcept = default;
     UnownedInstanceResource& operator=(const UnownedInstanceResource& copy_assign) {
         this->m_handle = copy_assign.m_handle;
-        this->m_instance = copy_assign.m_instance;
+        this->m_vulkan_instance = copy_assign.m_instance;
         return *this;
     }
 };

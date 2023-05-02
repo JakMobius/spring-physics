@@ -4,21 +4,27 @@
 
 SceneRenderer::SceneRenderer(GpuWindow& window) : m_gpu_window(window),
                                                   m_rendering_context(window) {
-    m_rendering_context.create_context();
-
     m_scene_geometry_render_stage = std::make_unique<SceneGeometryRenderStage>(m_rendering_context);
     m_light_map_bake_stage = std::make_unique<LightMapBakeStage>(m_rendering_context);
     m_shadow_map_gen_stage = std::make_unique<ShadowMapGenerationStage>(m_rendering_context);
     m_particles_stage = std::make_unique<ParticlesStage>(m_rendering_context);
+    m_imgui_stage = std::make_unique<ImguiStage>(m_rendering_context);
     m_resolve_present_stage = std::make_unique<ResolvePresentStage>(m_rendering_context);
 
     m_stages = {
-            m_shadow_map_gen_stage.get(),
-            m_light_map_bake_stage.get(),
-            m_scene_geometry_render_stage.get(),
-            m_particles_stage.get(),
-            m_resolve_present_stage.get(),
+         m_shadow_map_gen_stage.get(),
+         m_light_map_bake_stage.get(),
+         m_scene_geometry_render_stage.get(),
+         m_particles_stage.get(),
+         m_imgui_stage.get(),
+         m_resolve_present_stage.get(),
     };
+}
+
+void SceneRenderer::initialize() {
+    m_rendering_context.initialize();
+    BaseRenderer::initialize();
+    rebind_samplers();
 }
 
 void SceneRenderer::prepare_for_frame() {
@@ -31,6 +37,22 @@ void SceneRenderer::prepare_for_frame() {
 
 void SceneRenderer::draw() {
     prepare_for_frame();
+
+    ImGui_ImplVulkan_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+
+    ImGui::ShowDemoWindow();
+
+    ImGui::Begin("Colors");
+    ImGui::ColorEdit3("Ambient color", (float*)&m_rendering_context.m_ambient_color);
+    ImGui::ColorEdit3("Clear color", (float*)&m_rendering_context.m_clear_color);
+    ImGui::ColorEdit3("Fog color", (float*)&m_rendering_context.m_fog_color);
+    ImGui::SliderFloat("Fog amount", (float*)&m_rendering_context.m_fog_amount, 0, 0.1);
+
+    ImGui::End();
+    ImGui::Render();
+
     draw_frame();
 }
 
@@ -45,7 +67,7 @@ void SceneRenderer::draw_frame() {
     // buffers are not in use by the GPU.
     m_rendering_context.update_buffers();
 
-    auto swapchain = m_rendering_context.m_swapchain_manager->get_swapchain();
+    auto swapchain = m_rendering_context.m_swapchain.unowned_copy();
     auto result = swapchain.acquire_next_image(&m_rendering_context.m_swapchain_image_index, m_rendering_context.m_image_available_semaphore);
 
     if (result == VK_ERROR_OUT_OF_DATE_KHR || m_rendering_context.m_needs_resize) {
@@ -66,7 +88,7 @@ void SceneRenderer::draw_frame() {
     VkSemaphore signal_semaphores[] = {m_rendering_context.m_render_finished_semaphore.get_handle()};
     VkSemaphore wait_semaphores[] = {m_rendering_context.m_image_available_semaphore.get_handle()};
     VkPipelineStageFlags wait_stages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
-    VkSwapchainKHR present_swapchains[] = {m_rendering_context.m_swapchain_manager->get_swapchain().get_handle()};
+    VkSwapchainKHR present_swapchains[] = {m_rendering_context.m_swapchain.get_handle()};
     uint32_t present_swapchain_images[] = {m_rendering_context.m_swapchain_image_index};
 
     m_rendering_context.m_render_command_buffer.submit(
@@ -89,15 +111,27 @@ void SceneRenderer::draw_frame() {
     }
 }
 
-void SceneRenderer::cleanup_pipeline() {
-    BaseRenderer::cleanup_pipeline();
-    m_rendering_context.cleanup_pipeline();
+void SceneRenderer::handle_swapchain_update() {
+    m_rendering_context.handle_swapchain_update();
+    BaseRenderer::handle_swapchain_update();
+    rebind_samplers();
 }
 
-void SceneRenderer::create_pipeline() {
-    m_rendering_context.create_pipeline();
-    BaseRenderer::create_pipeline();
+void SceneRenderer::recreate_pipeline() {
+    int width = 0, height = 0;
+    glfwGetFramebufferSize(m_gpu_window.get_window()->get_window(), &width, &height);
+    while (width == 0 || height == 0) {
+        glfwGetFramebufferSize(m_gpu_window.get_window()->get_window(), &width, &height);
+        glfwWaitEvents();
+    }
 
+    m_gpu_window.get_device().wait_idle();
+
+    handle_swapchain_update();
+    m_rendering_context.m_needs_resize = false;
+}
+
+void SceneRenderer::rebind_samplers() {
     VkDescriptorImageInfo shadow_image_info{};
     shadow_image_info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
     shadow_image_info.imageView = m_rendering_context.m_shadow_color_image->get_view().get_handle();
@@ -129,19 +163,4 @@ void SceneRenderer::create_pipeline() {
     std::array<VkWriteDescriptorSet, 2> write_descriptor_sets = {shadow_image_info_write, shadow_map_image_info_write};
 
     vkUpdateDescriptorSets(m_gpu_window.get_device().get_handle(), 2, write_descriptor_sets.data(), 0, nullptr);
-}
-
-void SceneRenderer::recreate_pipeline() {
-    int width = 0, height = 0;
-    glfwGetFramebufferSize(m_gpu_window.get_window()->get_window(), &width, &height);
-    while (width == 0 || height == 0) {
-        glfwGetFramebufferSize(m_gpu_window.get_window()->get_window(), &width, &height);
-        glfwWaitEvents();
-    }
-
-    m_gpu_window.get_device().wait_idle();
-
-    cleanup_pipeline();
-    create_pipeline();
-    m_rendering_context.m_needs_resize = false;
 }
