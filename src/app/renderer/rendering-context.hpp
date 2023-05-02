@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../../base/gpu-window.hpp"
-#include "../../base/simple-swapchain-manager.hpp"
 #include "../../base/smart-buffer/smart-buffer.hpp"
 #include "../../world/geometry-pool.hpp"
 #include "../camera/camera.hpp"
@@ -34,7 +33,6 @@ public:
     VK::Semaphore m_image_available_semaphore{};
     VK::Semaphore m_render_finished_semaphore{};
 
-    std::unique_ptr<SimpleSwapchainManager<>> m_swapchain_manager{};
     uint32_t m_swapchain_image_index = -1;
 
     std::unique_ptr<Etna::CommandQueuePool> m_graphics_command_queue_pool;
@@ -69,13 +67,18 @@ public:
     VK::Sampler m_shadow_sampler{};
     VK::Sampler m_shadow_map_sampler{};
 
+    VK::Swapchain m_swapchain{};
+    VkSurfaceFormatKHR m_surface_format{};
+    VkExtent2D m_swapchain_extent{};
+    std::vector<VK::UnownedImage> m_swapchain_images{};
+
     VkSampleCountFlagBits m_msaa_samples = VK_SAMPLE_COUNT_1_BIT;
     bool m_needs_resize = false;
 
     VkFormat find_depth_format();
 
-    void create_context();
-    void create_descriptor_set_layout();
+    void initialize();
+    void create_descriptor_set_layouts();
     void create_vertex_buffer();
     void create_material_buffer();
     void create_transform_buffer();
@@ -84,7 +87,7 @@ public:
     void create_descriptor_sets();
     void create_sync_objects();
     void create_swapchain();
-    void create_pipeline();
+    void handle_swapchain_update();
     void create_shadow_sampler();
     void create_shadow_map_sampler();
     void create_depth_color_images();
@@ -92,6 +95,4 @@ public:
 
     void insert_color_barrier(VK::CommandBuffer& command_buffer);
     void insert_depth_barrier(VK::CommandBuffer& command_buffer);
-
-    void cleanup_pipeline();
 };

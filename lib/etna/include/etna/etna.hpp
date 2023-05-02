@@ -7,7 +7,6 @@
 #include "image.hpp"
 #include "init.hpp"
 #include "semaphore.hpp"
-#include "swapchain-manager.hpp"
 #include "volk.hpp"
 #include "command-queue.hpp"
 #include "vk-wrappers.hpp"

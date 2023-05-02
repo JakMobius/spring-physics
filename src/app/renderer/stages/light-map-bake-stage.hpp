@@ -26,8 +26,8 @@ class LightMapBakeStage : public Stage {
 public:
     explicit LightMapBakeStage(RenderingContext& ctx) : m_ctx(ctx) {}
 
-    void cleanup_pipeline() override;
-    void create_pipeline() override;
+    void initialize() override;
+    void handle_swapchain_update() override;
     void record_command_buffer(VK::CommandBuffer& command_buffer) override;
     void prepare_for_frame() override;
 
@@ -37,6 +37,7 @@ private:
     void create_graphics_pipeline();
     void make_texture_readable(VK::CommandBuffer& command_buffer) const;
     void update_push_constants();
+    void create_framebuffer();
 
     RenderingContext& m_ctx;
 

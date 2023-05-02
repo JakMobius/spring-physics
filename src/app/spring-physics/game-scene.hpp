@@ -35,6 +35,11 @@ class GameScene {
 public:
 
     GameScene(GpuWindow& window);
+    ~GameScene() {
+      if(m_drawer) {
+        m_drawer->deinitialize();
+      }
+    }
 
     void tick();
     void on_draw();

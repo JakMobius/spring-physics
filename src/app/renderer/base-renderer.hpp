@@ -6,13 +6,13 @@
 class BaseRenderer {
 public:
     explicit BaseRenderer() {};
-    void initialize();
+    virtual void initialize();
+    virtual void deinitialize();
 
 protected:
     void record_command_buffer(VK::CommandBuffer& command_buffer);
     virtual void prepare_for_frame();
-    virtual void cleanup_pipeline();
-    virtual void create_pipeline();
+    virtual void handle_swapchain_update();
 
     std::vector<Stage*> m_stages;
 };

@@ -23,8 +23,7 @@ public:
         m_push_constants.resize(m_layers);
     }
 
-    void cleanup_pipeline() override;
-    void create_pipeline() override;
+    void initialize() override;
     void record_command_buffer(VK::CommandBuffer& command_buffer) override;
     void prepare_for_frame() override;
 
@@ -32,6 +31,7 @@ private:
     void create_depth_image();
     void create_render_pass();
     void create_graphics_pipeline();
+    void create_framebuffers();
     void make_depth_readable(VK::CommandBuffer& command_buffer);
 
     void update_push_constants();

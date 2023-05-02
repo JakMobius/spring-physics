@@ -1,5 +1,6 @@
 
 #include "window.hpp"
+#include "../imgui/imgui.h"
 
 void WindowEventHandler::on_window_resize(Window* window, int width, int height) {
 
@@ -68,6 +69,8 @@ void Window::glfw_resize_handler(GLFWwindow* glfw_window, int width, int height)
 }
 
 void Window::glfw_key_handler(GLFWwindow* glfw_window, int key, int scancode, int action, int mods) {
+    if(ImGui::GetIO().WantCaptureKeyboard) return;
+
     auto window = (Window*) glfwGetWindowUserPointer(glfw_window);
     auto handler = window->m_event_handler;
     if(action == GLFW_PRESS) {
@@ -78,6 +81,8 @@ void Window::glfw_key_handler(GLFWwindow* glfw_window, int key, int scancode, in
 }
 
 void Window::glfw_mouse_button_handler(GLFWwindow* glfw_window, int button, int action, int mods) {
+    if(ImGui::GetIO().WantCaptureMouse) return;
+
     auto window = (Window*) glfwGetWindowUserPointer(glfw_window);
     auto handler = window->m_event_handler;
     if(action == GLFW_PRESS) {
@@ -88,6 +93,8 @@ void Window::glfw_mouse_button_handler(GLFWwindow* glfw_window, int button, int 
 }
 
 void Window::glfw_mouse_move_handler(GLFWwindow* glfw_window, double x, double y) {
+    if(ImGui::GetIO().WantCaptureMouse) return;
+
     auto window = (Window*) glfwGetWindowUserPointer(glfw_window);
     auto handler = window->m_event_handler;
 

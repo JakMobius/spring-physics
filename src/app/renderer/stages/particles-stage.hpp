@@ -19,8 +19,8 @@ class ParticlesStage : public Stage {
 public:
     explicit ParticlesStage(RenderingContext& ctx) : m_ctx(ctx) {}
 
-    void cleanup_pipeline() override;
-    void create_pipeline() override;
+    void initialize() override;
+    void handle_swapchain_update() override;
     void record_command_buffer(VK::CommandBuffer& command_buffer) override;
     void prepare_for_frame() override;
 
@@ -28,6 +28,7 @@ private:
     void update_push_constants();
     void create_render_pass();
     void create_graphics_pipeline();
+    void create_framebuffer();
 
     RenderingContext& m_ctx;
 

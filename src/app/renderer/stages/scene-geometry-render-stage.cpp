@@ -1,18 +1,11 @@
 
 #include "scene-geometry-render-stage.hpp"
 
-void SceneGeometryRenderStage::cleanup_pipeline() {
-    m_pipeline.destroy();
-    m_pipeline_layout.destroy();
-    m_render_pass.destroy();
-}
-
 void SceneGeometryRenderStage::create_render_pass() {
-    auto swapchain_manager = m_ctx.m_swapchain_manager.get();
     auto depth_format = m_ctx.find_depth_format();
     auto& window = m_ctx.m_gpu_window;
 
-    VK::Attachment color_attachment{swapchain_manager->get_swapchain_format().format};
+    VK::Attachment color_attachment{m_ctx.m_surface_format.format};
     color_attachment.set_samples(m_ctx.m_msaa_samples);
     color_attachment.set_load_store_operations(VK_ATTACHMENT_LOAD_OP_CLEAR, VK_ATTACHMENT_STORE_OP_STORE);
     color_attachment.set_final_layout(VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
@@ -46,22 +39,11 @@ void SceneGeometryRenderStage::create_render_pass() {
     render_pass_factory.get_subpass_descriptions().assign({subpass});
     render_pass_factory.get_subpass_dependency_descriptions().assign({dependency});
     m_render_pass = render_pass_factory.create(&window.get_device());
-
-    VK::FramebufferFactory framebuffer_factory;
-    framebuffer_factory.set_size(swapchain_manager->get_swapchain_extent());
-
-    auto& attachments = framebuffer_factory.get_attachments();
-
-    attachments.push_back(m_ctx.m_color_image->get_view());
-    attachments.push_back(m_ctx.m_depth_image->get_view());
-
-    m_framebuffer = framebuffer_factory.create(m_render_pass);
 }
 
 void SceneGeometryRenderStage::create_graphics_pipeline() {
     auto& window = m_ctx.m_gpu_window;
     auto device = &window.get_device();
-    auto swapchain_manager = m_ctx.m_swapchain_manager.get();
     auto msaa_samples = m_ctx.m_msaa_samples;
 
     auto vertex_shader = VK::ShaderModule::from_file(device, "resources/shaders/scene-geometry/vert.spv");
@@ -78,8 +60,8 @@ void SceneGeometryRenderStage::create_graphics_pipeline() {
     vertex_array_binding.add_attribute(SceneVertex::matrix_index_attribute);
     vertex_array_binding.add_attribute(SceneVertex::material_index_attribute);
 
-    pipeline_factory.m_viewport_state.add_viewport(VK::Viewport(swapchain_manager->get_swapchain_extent()));
-    pipeline_factory.m_viewport_state.add_scissor(VkRect2D {{0, 0}, swapchain_manager->get_swapchain_extent()});
+    pipeline_factory.m_viewport_state.add_viewport(VK::Viewport(m_ctx.m_swapchain_extent));
+    pipeline_factory.m_viewport_state.add_scissor(VkRect2D {{0, 0}, m_ctx.m_swapchain_extent});
 
     pipeline_factory.m_rasterization_state.set_cull_mode(VK_CULL_MODE_BACK_BIT);
     pipeline_factory.m_rasterization_state.set_front_face(VK_FRONT_FACE_COUNTER_CLOCKWISE);
@@ -110,8 +92,8 @@ void SceneGeometryRenderStage::create_graphics_pipeline() {
     m_pipeline = pipeline_factory.create(m_pipeline_layout, m_render_pass);
 }
 
-void SceneGeometryRenderStage::create_pipeline() {
-    create_render_pass();
+void SceneGeometryRenderStage::handle_swapchain_update() {
+    create_framebuffer();
     create_graphics_pipeline();
 }
 
@@ -131,11 +113,9 @@ void SceneGeometryRenderStage::record_command_buffer(VK::CommandBuffer& command_
     VkBuffer vertex_buffers[] = { vertex_buffer->get_buffer()->get_buffer().get_handle() };
     VkDeviceSize offsets[] = { 0 };
 
-    auto swapchain_manager = m_ctx.m_swapchain_manager.get();
-
     VK::RenderPassBeginInfo main_render_pass_begin_info(m_render_pass);
     main_render_pass_begin_info.set_framebuffer(m_framebuffer);
-    main_render_pass_begin_info.get_render_area().extent = swapchain_manager->get_swapchain_extent();
+    main_render_pass_begin_info.get_render_area().extent = m_ctx.m_swapchain_extent;
     main_render_pass_begin_info.set_clear_values(clear_values);
 
     command_buffer.begin_render_pass(main_render_pass_begin_info, VK_SUBPASS_CONTENTS_INLINE);
@@ -157,9 +137,7 @@ void SceneGeometryRenderStage::prepare_for_frame() {
 }
 
 void SceneGeometryRenderStage::update_push_constants() {
-    auto swapchain_manager = m_ctx.m_swapchain_manager.get();
-    auto extent = swapchain_manager->get_swapchain_extent();
-
+    auto extent = m_ctx.m_swapchain_extent;
     auto& camera_matrix = m_ctx.m_camera->get_matrix().m_data;
 
     memcpy(&m_push_constants.matrix, &camera_matrix, sizeof(camera_matrix));
@@ -175,4 +153,22 @@ void SceneGeometryRenderStage::update_push_constants() {
     m_push_constants.fog_color[2] = m_ctx.m_fog_color[2];
 
     m_push_constants.fog_amount = m_ctx.m_fog_amount;
+}
+
+void SceneGeometryRenderStage::initialize() {
+    create_render_pass();
+    create_graphics_pipeline();
+    create_framebuffer();
+}
+
+void SceneGeometryRenderStage::create_framebuffer() {
+    VK::FramebufferFactory framebuffer_factory;
+    framebuffer_factory.set_size(m_ctx.m_swapchain_extent);
+
+    auto& attachments = framebuffer_factory.get_attachments();
+
+    attachments.push_back(m_ctx.m_color_image->get_view());
+    attachments.push_back(m_ctx.m_depth_image->get_view());
+
+    m_framebuffer = framebuffer_factory.create(m_render_pass);
 }

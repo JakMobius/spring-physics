@@ -40,6 +40,7 @@ void RenderingContext::create_transform_buffer() {
     SmartBufferFactory factory{};
     factory.set_usage(VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT);
     m_transform_buffer = std::make_unique<SceneStorageBuffer>(&m_gpu_window.get_device(), factory);
+    m_transform_buffer->bind(m_scene_descriptor_set_array.get(), 0, 0);
 }
 
 void RenderingContext::create_vertex_buffer() {
@@ -52,6 +53,7 @@ void RenderingContext::create_material_buffer() {
     SmartBufferFactory factory{};
     factory.set_usage(VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT);
     m_material_buffer = std::make_unique<SceneStorageBuffer>(&m_gpu_window.get_device(), factory);
+    m_material_buffer->bind(m_scene_descriptor_set_array.get(), 1, 0);
 }
 
 void RenderingContext::create_particle_buffer() {
@@ -60,7 +62,7 @@ void RenderingContext::create_particle_buffer() {
     m_particle_vertex_buffer = std::make_unique<SceneStorageBuffer>(&m_gpu_window.get_device(), factory);
 }
 
-void RenderingContext::create_context() {
+void RenderingContext::initialize() {
     m_geometry_pool = std::make_unique<GeometryPool>(this);
     m_msaa_samples = m_gpu_window.get_device().get_physical_device()->get_max_usable_sample_count();
 
@@ -71,15 +73,30 @@ void RenderingContext::create_context() {
 
     m_graphics_command_queue_pool = std::make_unique<Etna::CommandQueuePool>(m_command_pool, m_gpu_window.get_device_graphics_queue());
 
-    create_descriptor_pool();
+    VK::UnownedSurface surface = m_gpu_window.get_vk_surface();
+
+    m_surface_format = VkSurfaceFormatKHR({ VK_FORMAT_B8G8R8A8_UNORM, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR });
+
+    auto physical_device = m_gpu_window.get_device().get_physical_device();
+    if(!physical_device->supports_surface_format(surface, m_surface_format)) {
+      m_surface_format = physical_device->get_supported_surface_formats(surface)[0];
+    }
+
+    m_render_command_buffer = m_command_pool.create_command_buffer();
+
     create_sync_objects();
-    create_descriptor_set_layout();
+    create_descriptor_pool();
+    create_descriptor_set_layouts();
+    create_descriptor_sets();
     create_vertex_buffer();
     create_material_buffer();
     create_particle_buffer();
     create_transform_buffer();
     create_shadow_sampler();
     create_shadow_map_sampler();
+
+    create_swapchain();
+    create_depth_color_images();
 }
 
 void RenderingContext::update_buffers() {
@@ -102,7 +119,7 @@ void RenderingContext::update_buffers() {
     }
 }
 
-void RenderingContext::create_descriptor_set_layout() {
+void RenderingContext::create_descriptor_set_layouts() {
     VK::DescriptorSetLayoutBinding transform_binding(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
     transform_binding.set_stage_flags(VK_SHADER_STAGE_VERTEX_BIT);
 
@@ -132,32 +149,52 @@ void RenderingContext::create_descriptor_set_layout() {
                                                      .create(&m_gpu_window.get_device());
 }
 
-void RenderingContext::cleanup_pipeline() {
-    if (m_scene_descriptor_set_array) m_scene_descriptor_set_array->free_sets();
-    if (m_particles_descriptor_set_array) m_particles_descriptor_set_array->free_sets();
-    if (m_color_image) m_color_image->destroy();
-    if (m_depth_image) m_depth_image->destroy();
-    m_render_command_buffer.destroy();
-}
-
-void RenderingContext::create_pipeline() {
+void RenderingContext::handle_swapchain_update() {
     create_swapchain();
     create_depth_color_images();
-    create_descriptor_sets();
-
-    m_render_command_buffer = m_command_pool.create_command_buffer();
-
-    m_transform_buffer->bind(m_scene_descriptor_set_array.get(), 0, 0);
-    m_material_buffer->bind(m_scene_descriptor_set_array.get(), 1, 0);
 }
 
 void RenderingContext::create_swapchain() {
-    m_swapchain_manager = std::make_unique<SimpleSwapchainManager<>>(m_gpu_window.get_vk_surface(), &m_gpu_window.get_device());
-    m_swapchain_manager->get_family_indices().insert(m_gpu_window.get_graphics_queue_family());
-    m_swapchain_manager->get_family_indices().insert(m_gpu_window.get_present_queue_family());
-
+    auto& surface = m_gpu_window.get_vk_surface();
+    auto& device = m_gpu_window.get_device();
     auto size = m_gpu_window.get_window()->get_framebuffer_size();
-    m_swapchain_manager->create_swapchain(size.x, size.y);
+
+    VK::SwapchainFactory factory;
+
+    auto physical_device = device.get_physical_device();
+    auto swapchain_capabilities = device.get_physical_device()->get_surface_capabilities(surface);
+
+    m_swapchain_extent = swapchain_capabilities.clamp_image_extent(size.x, size.y);
+    uint32_t image_count = swapchain_capabilities.get_optimal_chain_image_count();
+
+    if(physical_device->supports_surface_present_mode(surface, VK_PRESENT_MODE_MAILBOX_KHR)) {
+        factory.set_present_mode(VK_PRESENT_MODE_MAILBOX_KHR);
+    } else {
+        factory.set_present_mode(VK_PRESENT_MODE_FIFO_KHR);
+    }
+
+    factory.set_surface(surface);
+    factory.set_min_image_count(image_count);
+    factory.set_image_format(m_surface_format.format);
+    factory.set_image_color_space(m_surface_format.colorSpace);
+    factory.set_image_extent(m_swapchain_extent);
+    factory.set_image_usage(VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT);
+    factory.set_pre_transform(swapchain_capabilities.get_current_transform());
+    factory.set_composite_alpha(VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR);
+    factory.set_clipped(VK_TRUE);
+
+    uint32_t graphics_queue_family = m_gpu_window.get_graphics_queue_family();
+    uint32_t present_queue_family = m_gpu_window.get_present_queue_family();
+
+    if(graphics_queue_family != present_queue_family) {
+        factory.set_image_sharing_mode(VK_SHARING_MODE_CONCURRENT);
+        factory.get_queue_family_indices().assign({graphics_queue_family, present_queue_family});
+    } else {
+        factory.set_image_sharing_mode(VK_SHARING_MODE_EXCLUSIVE);
+    }
+
+    m_swapchain = factory.create(&device);
+    m_swapchain_images = m_swapchain.get_swapchain_images();
 }
 
 void RenderingContext::create_shadow_sampler() {
@@ -201,22 +238,19 @@ void RenderingContext::create_shadow_map_sampler() {
 }
 
 void RenderingContext::create_depth_color_images() {
-    auto swapchain_manager = m_swapchain_manager.get();
     auto depth_format = find_depth_format();
-    auto color_format = swapchain_manager->get_swapchain_format().format;
     auto& window = m_gpu_window;
-    auto msaa_samples = m_msaa_samples;
 
     auto color_image_factory = Etna::ImageFactory()
-                                       .set_samples(msaa_samples)
-                                       .set_extent({swapchain_manager->get_swapchain_extent().width, swapchain_manager->get_swapchain_extent().height, 1})
-                                       .set_format(color_format)
+                                       .set_samples(m_msaa_samples)
+                                       .set_extent({m_swapchain_extent.width, m_swapchain_extent.height, 1})
+                                       .set_format(m_surface_format.format)
                                        .set_usage(VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT)
                                        .set_aspect_mask(VK_IMAGE_ASPECT_COLOR_BIT);
 
     auto depth_image_factory = Etna::ImageFactory()
-                                       .set_samples(msaa_samples)
-                                       .set_extent({swapchain_manager->get_swapchain_extent().width, swapchain_manager->get_swapchain_extent().height, 1})
+                                       .set_samples(m_msaa_samples)
+                                       .set_extent({m_swapchain_extent.width, m_swapchain_extent.height, 1})
                                        .set_format(depth_format)
                                        .set_usage(VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT)
                                        .set_aspect_mask(VK_IMAGE_ASPECT_DEPTH_BIT);

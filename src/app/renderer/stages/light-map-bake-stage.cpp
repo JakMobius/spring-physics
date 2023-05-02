@@ -1,22 +1,12 @@
 
 #include "light-map-bake-stage.hpp"
 
-void LightMapBakeStage::cleanup_pipeline() {
-    if (m_depth_image) m_depth_image->destroy();
-    if (m_color_image) m_color_image->destroy();
-
-    m_pipeline.destroy();
-    m_pipeline_layout.destroy();
-    m_render_pass.destroy();
-}
-
 void LightMapBakeStage::create_depth_image() {
-    auto swapchain_manager = m_ctx.m_swapchain_manager.get();
     auto depth_format = m_ctx.find_depth_format();
     auto& window = m_ctx.m_gpu_window;
 
     VkFormat color_format = VK_FORMAT_R8G8B8A8_UNORM;
-    VkExtent2D extent = swapchain_manager->get_swapchain_extent();
+    VkExtent2D extent = m_ctx.m_swapchain_extent;
     VkExtent3D extent3D{extent.width, extent.height, 1};
 
     auto shading_color_image_factory = Etna::ImageFactory()
@@ -39,12 +29,10 @@ void LightMapBakeStage::create_depth_image() {
 }
 
 void LightMapBakeStage::create_render_pass() {
-    auto swapchain_manager = m_ctx.m_swapchain_manager.get();
     auto depth_format = m_ctx.find_depth_format();
     auto& window = m_ctx.m_gpu_window;
 
     VkFormat color_format = VK_FORMAT_R8G8B8A8_UNORM;
-    VkExtent2D extent = swapchain_manager->get_swapchain_extent();
 
     VK::Attachment color_attachment{color_format};
     color_attachment.set_samples(m_ctx.m_msaa_samples);
@@ -80,17 +68,10 @@ void LightMapBakeStage::create_render_pass() {
     render_pass_factory.get_subpass_descriptions().assign({subpass});
     render_pass_factory.get_subpass_dependency_descriptions().assign({dependency});
     m_render_pass = render_pass_factory.create(&window.get_device());
-
-    VK::FramebufferFactory framebuffer_factory;
-    framebuffer_factory.set_size(extent);
-    framebuffer_factory.get_attachments().push_back(m_color_image->get_view());
-    framebuffer_factory.get_attachments().push_back(m_depth_image->get_view());
-
-    m_framebuffer = framebuffer_factory.create(m_render_pass);
 }
+
 void LightMapBakeStage::create_graphics_pipeline() {
     auto& window = m_ctx.m_gpu_window;
-    auto swapchain_manager = m_ctx.m_swapchain_manager.get();
 
     VK::PipelineFactory pipeline_factory{};
 
@@ -108,8 +89,8 @@ void LightMapBakeStage::create_graphics_pipeline() {
     vertex_array_binding.add_attribute(SceneVertex::matrix_index_attribute);
     vertex_array_binding.add_attribute(SceneVertex::material_index_attribute);
 
-    pipeline_factory.m_viewport_state.add_viewport(VK::Viewport(swapchain_manager->get_swapchain_extent()));
-    pipeline_factory.m_viewport_state.add_scissor(VkRect2D{{0, 0}, swapchain_manager->get_swapchain_extent()});
+    pipeline_factory.m_viewport_state.add_viewport(VK::Viewport(m_ctx.m_swapchain_extent));
+    pipeline_factory.m_viewport_state.add_scissor(VkRect2D{{0, 0}, m_ctx.m_swapchain_extent});
 
     pipeline_factory.m_rasterization_state.set_cull_mode(VK_CULL_MODE_BACK_BIT);
     pipeline_factory.m_rasterization_state.set_front_face(VK_FRONT_FACE_COUNTER_CLOCKWISE);
@@ -139,9 +120,9 @@ void LightMapBakeStage::create_graphics_pipeline() {
     m_pipeline = pipeline_factory.create(m_pipeline_layout, m_render_pass);
 }
 
-void LightMapBakeStage::create_pipeline() {
+void LightMapBakeStage::handle_swapchain_update() {
     create_depth_image();
-    create_render_pass();
+    create_framebuffer();
     create_graphics_pipeline();
 }
 
@@ -151,7 +132,6 @@ void LightMapBakeStage::record_command_buffer(VK::CommandBuffer& command_buffer)
     clear_values[1].depthStencil = {1.0f, 0};
 
     auto vertex_buffer = m_ctx.m_vertex_buffer.get();
-    auto swapchain_manager = m_ctx.m_swapchain_manager.get();
 
     VkDescriptorSet descriptors[]{
             m_ctx.m_scene_descriptor_set_array->get_descriptor_sets()[0], // transforms
@@ -163,7 +143,7 @@ void LightMapBakeStage::record_command_buffer(VK::CommandBuffer& command_buffer)
 
     VK::RenderPassBeginInfo shading_render_pass_begin_info(m_render_pass);
     shading_render_pass_begin_info.set_framebuffer(m_framebuffer);
-    shading_render_pass_begin_info.get_render_area().extent = swapchain_manager->get_swapchain_extent();
+    shading_render_pass_begin_info.get_render_area().extent = m_ctx.m_swapchain_extent;
     shading_render_pass_begin_info.set_clear_values(clear_values);
 
     command_buffer.begin_render_pass(shading_render_pass_begin_info, VK_SUBPASS_CONTENTS_INLINE);
@@ -189,8 +169,7 @@ void LightMapBakeStage::make_texture_readable(VK::CommandBuffer& command_buffer)
 }
 
 void LightMapBakeStage::update_push_constants() {
-    auto swapchain_manager = m_ctx.m_swapchain_manager.get();
-    auto extent = swapchain_manager->get_swapchain_extent();
+    auto extent = m_ctx.m_swapchain_extent;
 
     auto& camera_matrix = m_ctx.m_camera->get_matrix().m_data;
     auto& camera_position = m_ctx.m_camera->get_position();
@@ -218,4 +197,20 @@ void LightMapBakeStage::update_push_constants() {
 
 void LightMapBakeStage::prepare_for_frame() {
     update_push_constants();
+}
+
+void LightMapBakeStage::initialize() {
+    create_render_pass();
+    create_graphics_pipeline();
+    create_depth_image();
+    create_framebuffer();
+}
+
+void LightMapBakeStage::create_framebuffer() {
+    VK::FramebufferFactory framebuffer_factory;
+    framebuffer_factory.set_size(m_ctx.m_swapchain_extent);
+    framebuffer_factory.get_attachments().push_back(m_color_image->get_view());
+    framebuffer_factory.get_attachments().push_back(m_depth_image->get_view());
+
+    m_framebuffer = framebuffer_factory.create(m_render_pass);
 }
