@@ -12,12 +12,6 @@ SpringObject::SpringObject(World* world) : WorldObject(world) {
 }
 
 SpringObject::~SpringObject() {
-    if(m_geometry_object) {
-        auto geometry_pool = m_world->get_rendering_context()->m_geometry_pool.get();
-        geometry_pool->destroy_object(m_geometry_object);
-        geometry_pool->destroy_material(m_material);
-    }
-
     m_world->remove_object(this);
 }
 
@@ -44,14 +38,12 @@ void SpringObject::tick(float dt) {
 }
 
 void SpringObject::create_colored_mesh(const Vec3f& color) {
-    delete m_geometry_object;
-
     auto geometry_pool = m_world->get_rendering_context()->m_geometry_pool.get();
     if(!m_material) m_material = geometry_pool->create_material();
     m_material->set_color(color);
 
     ShapeGenerator generator;
-    generator.add_cube({}, {1.0, 0.05, 0.05}, m_material);
+    generator.add_cube({}, {1.0, 0.05, 0.05}, m_material.get());
 
     m_geometry_object = geometry_pool->create_object({ generator.get_mesh() }, nullptr);
 }

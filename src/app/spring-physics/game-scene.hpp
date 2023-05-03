@@ -23,6 +23,7 @@ class GameScene {
     GeometryObject* object = nullptr;
 
     Vec3f m_input_airplane_controls {};
+    Vec3f m_gamepad_airplane_controls {};
     Vec3f m_real_airplane_controls {};
 
     std::unique_ptr<ControllableCreature> m_creature {};
@@ -44,6 +45,9 @@ public:
     void tick();
     void on_draw();
 
+    void spawn();
+
+    CameraController* get_camera_controller() { return m_camera_controller.get(); }
     UserController* get_user_controller() { return &m_user_controller; }
 
     void build_model(const Matrix4f& transform);

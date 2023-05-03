@@ -17,8 +17,8 @@ class World {
 
     std::vector<std::unique_ptr<SurfaceTriangleObject>> m_surface_mesh {};
 
-    GeometryObject* m_floor = nullptr;
-    Material* m_floor_material = nullptr;
+    std::unique_ptr<GeometryObject> m_floor = nullptr;
+    std::unique_ptr<Material> m_floor_material = nullptr;
 
 public:
     void add_floor();

@@ -52,20 +52,21 @@ class GeometryPool {
 
 public:
 
-    unsigned int* get_start_indices() { return &start_indices[0]; };
-    unsigned int* get_size_array() { return &size_array[0]; };
+    const std::vector<unsigned int>& get_start_indices() { return start_indices; };
+    const std::vector<unsigned int>& get_size_array() { return size_array; };
+
     int get_object_count() { return m_objects.size(); }
 
     GeometryPool(RenderingContext* drawer);
 
-    GeometryObject* create_object(const GeometryObjectConfig &object_config, GeometryObject* parent);
+    std::unique_ptr<GeometryObject> create_object(const GeometryObjectConfig &object_config, GeometryObject* parent);
     void destroy_object(GeometryObject* object);
 
     SceneStorageBuffer* get_vertex_buffer();
     SceneStorageBuffer* get_material_buffer();
     SceneStorageBuffer* get_matrix_buffer();
 
-    Material* create_material();
+    std::unique_ptr<Material> create_material();
     void destroy_material(Material* material);
 
     void synchronize();

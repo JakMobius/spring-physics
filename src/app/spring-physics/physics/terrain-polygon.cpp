@@ -1,6 +1,7 @@
 
 #include "terrain-polygon.hpp"
 #include "physics-thread.hpp"
+#include "../terrain/terrain.hpp"
 #include "../../../utils/capsule-intersect.hpp"
 
 bool TerrainPolygon::check_hit(const Vec3f &point, const Vec3f &direction, float* distance) const {
@@ -87,7 +88,8 @@ TerrainPolygon::collides(Vec3f ray_origin, Vec3f ray_direction, float distance, 
     return false;
 }
 
-TerrainPolygon::TerrainPolygon(Vec3f point_a, Vec3f point_b, Vec3f point_c) {
+TerrainPolygon::TerrainPolygon(Terrain* terrain, Vec3f point_a, Vec3f point_b, Vec3f point_c) {
+    m_terrain = terrain;
     set_points(point_a, point_b, point_c);
 }
 
@@ -97,4 +99,10 @@ void TerrainPolygon::set_points(Vec3f point_a, Vec3f point_b, Vec3f point_c) {
     m_points[2] = point_c;
 
     m_normal = (point_b - point_a).cross(point_c - point_a).normalize();
+}
+
+TerrainPolygon::~TerrainPolygon() {
+    if(m_terrain) {
+        m_terrain->destroy_triangle(this);
+    }
 }

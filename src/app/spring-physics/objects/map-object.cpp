@@ -15,18 +15,6 @@ MapObject::MapObject(World *world, const std::string &path, const Matrix4f& tran
 }
 
 MapObject::~MapObject() {
-    if (m_geometry_object) {
-        auto geometry_pool = m_world->get_rendering_context()->m_geometry_pool.get();
-        geometry_pool->destroy_object(m_geometry_object);
-        geometry_pool->destroy_material(m_material);
-    }
-
-    for(auto triangle : m_physics_triangles) {
-        m_world->get_physics_engine()->get_terrain()->destroy_triangle(triangle);
-    }
-
-    m_physics_triangles.clear();
-
     m_world->remove_object(this);
 }
 
@@ -64,7 +52,7 @@ void MapObject::create_mesh(const std::string &path, const Matrix4f& transform) 
             point_b *= transform;
             point_c *= transform;
 
-            shape_generator.add_triangle(point_a, point_b, point_c, m_material);
+            shape_generator.add_triangle(point_a, point_b, point_c, m_material.get());
             m_physics_triangles.push_back(terrain->add_triangle(point_a, point_b, point_c));
         }
     }

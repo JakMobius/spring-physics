@@ -13,6 +13,20 @@ void GameScene::update_inputs() {
     if (m_window.get_window()->is_key_pressed(GLFW_KEY_DOWN)) m_input_airplane_controls.y = 1;
     if (m_window.get_window()->is_key_pressed(GLFW_KEY_LEFT)) m_input_airplane_controls.x = -1;
     if (m_window.get_window()->is_key_pressed(GLFW_KEY_RIGHT)) m_input_airplane_controls.x = 1;
+
+    if(glfwJoystickPresent(GLFW_JOYSTICK_1)) {
+          int count = 0;
+          const float* axes = glfwGetJoystickAxes(GLFW_JOYSTICK_1, &count);
+
+          if(count >= 6) {
+            m_throttle += (axes[4] + 1) / 2;
+            m_gamepad_airplane_controls.set(0, axes[0]);
+            m_gamepad_airplane_controls.set(1, axes[1]);
+          }
+    } else {
+        m_gamepad_airplane_controls = Vec3f(0, 0, 0);
+    }
+
 }
 
 void GameScene::toggle_free_camera() {
@@ -24,7 +38,6 @@ void GameScene::toggle_free_camera() {
         m_camera_controller = std::make_unique<FollowCreatureCamera>(m_window.get_window(), m_creature.get());
     }
     m_camera_controller->set_controlled_camera(m_camera.get());
-    m_user_controller.set_camera_controller(m_camera_controller.get());
 }
 
 void GameScene::build_model(const Matrix4f& transform) {
@@ -46,9 +59,8 @@ GameScene::GameScene(GpuWindow &window) : m_window(window) {
 //    m_world->get_drawer()->add_light({{0.3, -0.8, 0.5},
 //                                        {0.6, 0.6,  0.6}});
     m_map_object = std::make_unique<MapObject>(m_world.get(), "resources/maps/map2.obj", Matrix4f::scale_matrix(0.03, 0.03, 0.03) * Matrix4f::translation_matrix(0, 5, 0));
-    // On the border (for car & physics testing)
-    build_model({});
 
+    spawn();
     //    m_runway_texture = m_world->get_renderer()->get_texture_manager()->load_texture("resources/textures/runway.png");
     //    m_runway_texture->make_resident(true);
 
@@ -60,9 +72,12 @@ void GameScene::tick() {
 
     float dt = 1.0f / 60.0f;
 
-    m_user_controller.on_tick(dt);
+    if(m_camera_controller)
+      m_camera_controller->on_tick(dt);
 
-    m_real_airplane_controls = m_input_airplane_controls * 0.1 + m_real_airplane_controls * 0.9;
+    Vec3f controls = m_input_airplane_controls + m_gamepad_airplane_controls;
+
+    m_real_airplane_controls = controls * 0.1 + m_real_airplane_controls * 0.9;
 
     if(m_creature) {
         m_creature->set_controls(m_real_airplane_controls);
@@ -95,4 +110,16 @@ void GameScene::tick() {
 //    m_world->get_drawer()->m_camera_position = orthogonal_camera_position;
 
     m_drawer->draw();
+}
+
+void GameScene::spawn() {
+    if(!m_free_camera) {
+        m_camera_controller = nullptr;
+    }
+    // On the border (for car & physics testing)
+    build_model({});
+    if(!m_free_camera) {
+        m_camera_controller = std::make_unique<FollowCreatureCamera>(m_window.get_window(), m_creature.get());
+        m_camera_controller->set_controlled_camera(m_camera.get());
+    }
 }

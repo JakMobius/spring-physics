@@ -52,6 +52,21 @@ Vec3f FollowCreatureCamera::get_movement() {
     if (m_window->is_key_pressed(GLFW_KEY_D)) result.x = 1.0f;
     if (m_window->is_key_pressed(GLFW_KEY_SPACE)) result.y = 1.0f;
     if (m_window->is_key_pressed(GLFW_KEY_LEFT_SHIFT)) result.y = -1.0f;
+
+
+    if(glfwJoystickPresent(GLFW_JOYSTICK_1)) {
+        int count = 0;
+        const float* axes = glfwGetJoystickAxes(GLFW_JOYSTICK_1, &count);
+
+        if(count >= 6) {
+             Vec3f joystick_controls = Vec3f(axes[2], -axes[5], 0.0f);
+             float len = joystick_controls.len();
+             if(len > 0.05f) {
+               joystick_controls -= joystick_controls * 0.05f / len;
+               result += joystick_controls;
+             }
+        }
+    }
     return result;
 }
 

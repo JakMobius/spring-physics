@@ -5,46 +5,56 @@
 GeometryPool::GeometryPool(RenderingContext* drawer) : m_drawer(drawer) {
 }
 
-void GeometryPool::defragment_single_object(GeometryObject* object, int offset) {
+void GeometryPool::defragment_single_object(GeometryObject* object, int new_position) {
+    assert(new_position % SceneVertex::length == 0);
+
     auto& storage = get_vertex_buffer()->get_storage();
 
-    object->m_vertex_buffer_offset -= offset;
+    auto old_position = object->get_vertex_buffer_offset();
+    if(old_position == new_position) return;
 
-    adjust_offset_from_arrays(object->m_vertex_buffer_offset + offset, object->m_vertex_buffer_offset);
-    memmove(&storage[object->m_vertex_buffer_offset], &storage[object->m_vertex_buffer_offset + offset],
-            object->m_vertex_buffer_length * sizeof(float));
+    auto object_buffer_length = object->get_vertex_buffer_length();
 
-    get_vertex_buffer()->mark_dirty(object->m_vertex_buffer_offset, object->m_vertex_buffer_offset + object->m_vertex_buffer_length);
+    object->set_vertex_buffer_offset(new_position);
+
+    adjust_offset_from_arrays(old_position, new_position);
+    memmove(&storage[new_position], &storage[old_position],
+            object_buffer_length * sizeof(float));
+
+    get_vertex_buffer()->mark_dirty(new_position, new_position + object_buffer_length);
 }
 
 void GeometryPool::defragment_buffer(int limit) {
     if (m_defragmented_elements == nullptr) return;
 
-    GeometryObject* previous = m_defragmented_elements;
-    m_defragmented_elements = m_defragmented_elements->m_next;
+    GeometryObject* last_defragmented = m_defragmented_elements;
+    m_defragmented_elements = m_defragmented_elements->get_next();
 
     int free_offset = 0;
 
-    if (previous->m_prev) {
-        free_offset = previous->m_prev->m_vertex_buffer_length + previous->m_prev->m_vertex_buffer_offset;
+    auto prev = last_defragmented->get_prev();
+
+    if (prev) {
+        free_offset = prev->get_vertex_buffer_length() + prev->get_vertex_buffer_offset();
     }
 
-    if (previous->m_vertex_buffer_offset > free_offset) {
-        defragment_single_object(previous, previous->m_vertex_buffer_offset - free_offset);
+    if (last_defragmented->get_vertex_buffer_offset() > free_offset) {
+        defragment_single_object(last_defragmented, free_offset);
         if (!(--limit)) return;
     }
 
-    free_offset = previous->m_vertex_buffer_offset + previous->m_vertex_buffer_length;
+    free_offset = last_defragmented->get_vertex_buffer_offset() +
+                  last_defragmented->get_vertex_buffer_length();
 
-    for (; m_defragmented_elements; m_defragmented_elements = m_defragmented_elements->m_next) {
+    for (; m_defragmented_elements; m_defragmented_elements = m_defragmented_elements->get_next()) {
         GeometryObject* next = m_defragmented_elements;
 
-        if (next->m_vertex_buffer_offset > free_offset) {
-            defragment_single_object(next, next->m_vertex_buffer_offset - free_offset);
+        if (next->get_vertex_buffer_offset()> free_offset) {
+            defragment_single_object(next, free_offset);
             if (!(--limit)) return;
         }
 
-        free_offset = next->m_vertex_buffer_offset + next->m_vertex_buffer_length;
+        free_offset = next->get_vertex_buffer_offset() + next->get_vertex_buffer_length();
     }
 }
 
@@ -63,7 +73,7 @@ void GeometryPool::extend_buffer(std::vector<float>& buffer, int min_capacity) {
 int GeometryPool::get_free_vertex_buffer_offset() {
     if (m_objects.empty()) return 0;
 
-    return m_objects.back()->m_vertex_buffer_offset + m_objects.back()->m_vertex_buffer_length;
+    return m_objects.back()->get_vertex_buffer_offset() + m_objects.back()->get_vertex_buffer_length();
 }
 
 int GeometryPool::allocate_buffer(int size) {
@@ -105,31 +115,32 @@ void GeometryPool::adjust_offset_from_arrays(int offset, int new_offset) {
 }
 
 void GeometryPool::destroy_object(GeometryObject* object) {
-    for (auto& child: object->m_children) {
+    for (auto& child: object->get_children()) {
         destroy_object(child);
     }
 
+
     m_dirty_transform_objects.erase(object);
 
-    object->m_children.clear();
+    object->get_children().clear();
 
     auto old_defragmented_handle = m_defragmented_elements;
 
-    remove_offset_from_arrays(object->m_vertex_buffer_offset);
+    remove_offset_from_arrays(object->get_vertex_buffer_offset());
 
-    m_matrix_buffer_index_pool.release_index(object->m_matrix_buffer_index);
+    m_matrix_buffer_index_pool.release_index(object->get_matrix_buffer_index());
 
     //    std::cout << "Deleted object handle on index " << object->m_vertex_buffer_offset << " with stride of " << object->m_vertex_buffer_length << " floats\n";
 
-    if (!old_defragmented_handle || old_defragmented_handle->m_matrix_buffer_index >= object->m_matrix_buffer_index) {
-        m_defragmented_elements = object->m_prev;
+    if (!old_defragmented_handle || old_defragmented_handle->get_matrix_buffer_index() >= object->get_matrix_buffer_index()) {
+        m_defragmented_elements = object->get_prev();
     }
 
     m_objects.remove(object);
-    delete object;
+    object->set_geometry_pool(nullptr);
 }
 
-GeometryObject* GeometryPool::create_object(const GeometryObjectConfig& object_config, GeometryObject* parent) {
+std::unique_ptr<GeometryObject> GeometryPool::create_object(const GeometryObjectConfig& object_config, GeometryObject* parent) {
     auto buffer_stride = (int) object_config.m_mesh.size() * SceneVertex::length;
     auto free_index = allocate_buffer(buffer_stride);
 
@@ -137,8 +148,8 @@ GeometryObject* GeometryPool::create_object(const GeometryObjectConfig& object_c
 
     auto matrix_index = create_matrix();
 
-    auto object = new GeometryObject(this, free_index, buffer_stride, matrix_index, parent);
-    m_objects.push_back(object);
+    auto object = std::make_unique<GeometryObject>(this, free_index, buffer_stride, matrix_index, parent);
+    m_objects.push_back(object.get());
     object->set_needs_transform_update();
 
     insert_offsets_to_arrays(free_index, buffer_stride);
@@ -181,23 +192,23 @@ void GeometryPool::update_transforms() {
 }
 
 void GeometryPool::update_object_transform(GeometryObject* object) {
-    auto index = object->m_matrix_buffer_index;
-    copy_matrix(index, object->m_world_transform);
+    auto index = object->get_matrix_buffer_index();
+    copy_matrix(index, object->get_world_transform());
 }
 
 void GeometryPool::update_transform_delayed(GeometryObject* object) {
     m_dirty_transform_objects.insert(object);
 }
 
-Material* GeometryPool::create_material() {
+std::unique_ptr<Material> GeometryPool::create_material() {
     auto index = m_material_buffer_index_pool.get_next();
-    auto material = new Material(this);
+    auto material = std::make_unique<Material>(this);
 
     material->set_buffer_index(index);
     extend_buffer(get_material_buffer()->get_storage(), (index + 1) * material_stride);
     get_material_buffer()->mark_dirty(index * material_stride, (index + 1) * material_stride);
 
-    m_materials.insert(material);
+    m_materials.insert(material.get());
     return material;
 }
 
@@ -205,7 +216,7 @@ void GeometryPool::destroy_material(Material* material) {
     m_material_buffer_index_pool.release_index(material->get_buffer_index());
     m_dirty_materials.erase(material);
     m_materials.erase(material);
-    delete material;
+    material->set_geometry_pool(nullptr);
 }
 
 void GeometryPool::update_material_delayed(Material* material) {
@@ -236,6 +247,7 @@ int GeometryPool::create_matrix() {
     extend_buffer(get_matrix_buffer()->get_storage(), (matrix_index + 1) * transform_stride);
     return matrix_index;
 }
+
 SceneStorageBuffer* GeometryPool::get_vertex_buffer() { return m_drawer->m_vertex_buffer.get(); }
 SceneStorageBuffer* GeometryPool::get_material_buffer() { return m_drawer->m_material_buffer.get(); }
 SceneStorageBuffer* GeometryPool::get_matrix_buffer() { return m_drawer->m_transform_buffer.get(); }

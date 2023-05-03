@@ -9,14 +9,6 @@ UserController::UserController(GameScene *scene) : m_scene(scene) {
 
 }
 
-void UserController::on_tick(float dt) {
-    m_camera_controller->on_tick(dt);
-}
-
-void UserController::set_camera_controller(CameraController *camera_controller) {
-    m_camera_controller = camera_controller;
-}
-
 void UserController::on_key_press(Window* window, int key, int scancode, int mods) {
     if(key == GLFW_KEY_ESCAPE) {
         window->capture_mouse(false);
@@ -26,18 +18,22 @@ void UserController::on_key_press(Window* window, int key, int scancode, int mod
         m_scene->toggle_free_camera();
     }
 
-    if(m_camera_controller)
-        m_camera_controller->on_key_press(key, scancode, mods);
+    if(key == GLFW_KEY_R) {
+        m_scene->spawn();
+    }
+
+    if(m_scene->get_camera_controller())
+        m_scene->get_camera_controller()->on_key_press(key, scancode, mods);
 }
 
 void UserController::on_key_release(Window* window, int key, int scancode, int mods) {
-    if (m_camera_controller)
-        m_camera_controller->on_key_release(key, scancode, mods);
+    if (m_scene->get_camera_controller())
+        m_scene->get_camera_controller()->on_key_release(key, scancode, mods);
 }
 
 void UserController::on_captured_mouse_move(Window* window, double dx, double dy) {
-    if (m_camera_controller) {
-        m_camera_controller->on_captured_mouse_move(dx, dy);
+    if (m_scene->get_camera_controller()) {
+        m_scene->get_camera_controller()->on_captured_mouse_move(dx, dy);
     }
 }
 

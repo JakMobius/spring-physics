@@ -11,27 +11,17 @@ SurfaceTriangleObject::SurfaceTriangleObject(World *world, Vec3f vertex_a, Vec3f
 }
 
 SurfaceTriangleObject::~SurfaceTriangleObject() {
-    if (m_geometry_object) {
-        auto geometry_pool = m_world->get_rendering_context()->m_geometry_pool.get();
-        geometry_pool->destroy_object(m_geometry_object);
-        geometry_pool->destroy_material(m_material);
-    }
-
-    m_world->get_physics_engine()->get_terrain()->destroy_triangle(m_physics_triangle);
-    m_physics_triangle = nullptr;
     m_world->remove_object(this);
 }
 
 void SurfaceTriangleObject::create_colored_mesh(const Vec3f &color) {
-    delete m_geometry_object;
-
     auto geometry_pool = m_world->get_rendering_context()->m_geometry_pool.get();
 
     if (!m_material) m_material = geometry_pool->create_material();
     m_material->set_color(color);
 
     ShapeGenerator generator;
-    generator.add_triangle({0, 0, 0}, {0, 1, 0}, {0, 0, 1}, m_material);
+    generator.add_triangle({0, 0, 0}, {0, 1, 0}, {0, 0, 1}, m_material.get());
 
     m_geometry_object = geometry_pool->create_object({generator.get_mesh()}, nullptr);
 }

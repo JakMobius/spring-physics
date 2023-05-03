@@ -15,18 +15,10 @@ CreatureTriangleObject::CreatureTriangleObject(World *world, PhysicsVertex *vert
 }
 
 CreatureTriangleObject::~CreatureTriangleObject() {
-    if (m_geometry_object) {
-        auto geometry_pool = m_world->get_rendering_context()->m_geometry_pool.get();
-        geometry_pool->destroy_object(m_geometry_object);
-        geometry_pool->destroy_material(m_material);
-    }
-
     m_world->remove_object(this);
 }
 
 void CreatureTriangleObject::create_colored_mesh(const Vec3f &color) {
-    delete m_geometry_object;
-
     auto geometry_pool = m_world->get_rendering_context()->m_geometry_pool.get();
 
     if (!m_material) m_material = geometry_pool->create_material();
@@ -36,8 +28,8 @@ void CreatureTriangleObject::create_colored_mesh(const Vec3f &color) {
     // Add two triangles to deal with culling
     // I could also use a different culling mode, but it would
     // be more expensive
-    generator.add_triangle({0, 0, 0}, {0, 1, 0}, {0, 0, 1}, m_material);
-    generator.add_triangle({0, 0, 0}, {0, 0, 1}, {0, 1, 0}, m_material);
+    generator.add_triangle({0, 0, 0}, {0, 1, 0}, {0, 0, 1}, m_material.get());
+    generator.add_triangle({0, 0, 0}, {0, 0, 1}, {0, 1, 0}, m_material.get());
 
     m_geometry_object = geometry_pool->create_object({generator.get_mesh()}, nullptr);
 }

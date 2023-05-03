@@ -153,7 +153,13 @@ void LightMapBakeStage::record_command_buffer(VK::CommandBuffer& command_buffer)
 
     command_buffer.bind_vertex_buffers(vertex_buffers, offsets);
     command_buffer.bind_descriptor_sets(VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline_layout.get_handle(), descriptors, {});
-    command_buffer.draw(m_ctx.m_vertex_buffer->get_storage().size() / SceneVertex::length, 1, 0, 0);
+
+    auto& sizes = m_ctx.m_geometry_pool->get_size_array();
+    auto& indices = m_ctx.m_geometry_pool->get_start_indices();
+
+    for(int i = 0; i < sizes.size(); i++) {
+      command_buffer.draw(sizes[i], 1, indices[i], 0);
+    }
 
     command_buffer.end_render_pass();
 

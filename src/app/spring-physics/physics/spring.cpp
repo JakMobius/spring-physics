@@ -4,7 +4,7 @@
 
 #include "spring.hpp"
 
-void PhysicsSpring::force_tick() const {
+void PhysicsSpring::force_tick() {
 
     Vec3f delta = get_delta();
 
@@ -12,8 +12,17 @@ void PhysicsSpring::force_tick() const {
 
     delta /= spring_length;
 
+    float relative_length = m_target_length / spring_length;
+    if(relative_length < m_low_deformation_length) {
+        m_target_length = spring_length * m_low_deformation_length;
+        relative_length = m_low_deformation_length;
+    } else if(relative_length > m_high_deformation_length) {
+        m_target_length = spring_length * m_high_deformation_length;
+        relative_length = m_high_deformation_length;
+    }
+
     float relative_speed = get_extension_speed();
-    float force = (m_target_length / spring_length - 1) * m_strength - relative_speed * m_damping;
+    float force = (relative_length - 1) * m_strength - relative_speed * m_damping;
 
     delta *= force;
 

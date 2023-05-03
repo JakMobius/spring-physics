@@ -9,7 +9,7 @@ AirplaneCreature::AirplaneCreature(World *world, const Matrix4f &transform) : m_
     ModelBuilder::Builder builder;
 
     builder.get_state().set_matrix(Matrix4f::scale_matrix(0.3f, 0.3f, 0.3f)
-                                   * Matrix4f::translation_matrix(0.0f, 1.0f, 0.0f)
+                                   * Matrix4f::translation_matrix(0.0f, 1.1f, 0.0f)
                                    * transform);
 
     // Build a cube with 8 vertices and 12 edges

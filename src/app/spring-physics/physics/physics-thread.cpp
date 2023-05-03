@@ -86,8 +86,8 @@ void PhysicsThread::substep(float dt) {
 }
 
 void PhysicsThread::handle_terrain_collision(float dt) {
-    for (auto creature: get_creatures()) {
-        for (auto vertex: creature->get_vertices()) {
+    for (auto& creature: get_creatures()) {
+        for (auto& vertex: creature->get_vertices()) {
             auto* physics_vertex = vertex->get_physics_vertex();
             auto from = physics_vertex->m_position;
             auto to = from + physics_vertex->m_velocity * dt;
@@ -203,19 +203,6 @@ void PhysicsThread::process_vertex_forces(float dt, PhysicsVertex *vertex) {
             }
 
             if(isnan(horizontal_force.x) || isnan(horizontal_force.y) || isnan(horizontal_velocity.x) || isnan(horizontal_velocity.y)) {
-                std::cout << "nan" << std::endl;
-                std::cout << "horizontal_velocity: " << horizontal_velocity.x << ", " << horizontal_velocity.y << std::endl;
-                std::cout << "horizontal_force: " << horizontal_force.x << ", " << horizontal_force.y << std::endl;
-                std::cout << "friction: " << friction << std::endl;
-                std::cout << "single_tick_velocity: " << single_tick_velocity << std::endl;
-                std::cout << "single_tick_friction: " << single_tick_friction << std::endl;
-                std::cout << "horizontal_velocity_len: " << horizontal_velocity_len << std::endl;
-                std::cout << "vertex->m_mass: " << vertex->m_mass << std::endl;
-                std::cout << "dt: " << dt << std::endl;
-                std::cout << "vertex->m_position: " << vertex->m_position.x << ", " << vertex->m_position.y << ", " << vertex->m_position.z << std::endl;
-                std::cout << "vertex->m_velocity: " << vertex->m_velocity.x << ", " << vertex->m_velocity.y << ", " << vertex->m_velocity.z << std::endl;
-                std::cout << "vertex->m_force: " << vertex->m_force.x << ", " << vertex->m_force.y << ", " << vertex->m_force.z << std::endl;
-                std::cout << "vertex->m_floor_friction: " << vertex->m_floor_friction << std::endl;
                 assert(false);
             }
 

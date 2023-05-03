@@ -11,19 +11,11 @@ JetObject::JetObject(World *world, PhysicsVertex *head_vertex, PhysicsVertex *ta
 }
 
 JetObject::~JetObject() {
-    if(m_geometry_object) {
-        auto geometry_pool = m_world->get_rendering_context()->m_geometry_pool.get();
-        geometry_pool->destroy_object(m_geometry_object);
-        geometry_pool->destroy_material(m_material);
-    }
-
     m_world->remove_object(this);
 }
 
 void JetObject::create_colored_mesh(const Vec3f &color) {
     // Just a cylinder for now
-
-    delete m_geometry_object;
 
     auto geometry_pool = m_world->get_rendering_context()->m_geometry_pool.get();
     if (!m_material) m_material = geometry_pool->create_material();
@@ -46,11 +38,11 @@ void JetObject::create_colored_mesh(const Vec3f &color) {
         Vec3f offset1 = (basis1 * cos(angle) + basis2 * sin(angle)) * radius;
         Vec3f offset2 = (basis1 * cos(next_angle) + basis2 * sin(next_angle)) * radius;
 
-        shape_generator.add_triangle(start, start + offset1, start + offset2, m_material);
-        shape_generator.add_triangle(start + offset1, end + offset1, start + offset2, m_material);
+        shape_generator.add_triangle(start, start + offset1, start + offset2, m_material.get());
+        shape_generator.add_triangle(start + offset1, end + offset1, start + offset2, m_material.get());
 
-        shape_generator.add_triangle(start + offset2, end + offset1, end + offset2, m_material);
-        shape_generator.add_triangle(end, end + offset2, end + offset1, m_material);
+        shape_generator.add_triangle(start + offset2, end + offset1, end + offset2, m_material.get());
+        shape_generator.add_triangle(end, end + offset2, end + offset1, m_material.get());
     }
 
     m_geometry_object = geometry_pool->create_object({shape_generator.get_mesh()}, nullptr);

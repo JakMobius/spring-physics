@@ -9,7 +9,10 @@ struct PhysicsSpring {
     float m_strength = 1;
     float m_damping = 1;
 
-    void force_tick() const;
+    float m_low_deformation_length = 0.9;
+    float m_high_deformation_length = 1.1;
+
+    void force_tick();
 
     Vec3f get_delta() const;
     float get_length() const;

@@ -7,8 +7,8 @@
 #include "world-object.hpp"
 
 class JetObject : public WorldObject {
-    GeometryObject *m_geometry_object = nullptr;
-    Material *m_material = nullptr;
+    std::unique_ptr<GeometryObject> m_geometry_object;
+    std::unique_ptr<Material> m_material = nullptr;
     std::unique_ptr<PhysicsJet> m_physics_jet = nullptr;
     float m_max_force = 1.0f;
     float m_particles_accumulator = 0.0f;

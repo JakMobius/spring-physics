@@ -12,24 +12,17 @@ VertexObject::VertexObject(World* world) : WorldObject(world) {
 }
 
 VertexObject::~VertexObject() {
-    if(m_geometry_object) {
-        auto geometry_pool = m_world->get_rendering_context()->m_geometry_pool.get();
-        geometry_pool->destroy_object(m_geometry_object);
-        geometry_pool->destroy_material(m_material);
-    }
     m_world->remove_object(this);
 }
 
 void VertexObject::create_colored_mesh(const Vec3f& color) {
-    delete m_geometry_object;
-
     auto geometry_pool = m_world->get_rendering_context()->m_geometry_pool.get();
 
     if(!m_material) m_material = geometry_pool->create_material();
     m_material->set_color(color);
 
     ShapeGenerator generator;
-    generator.add_sphere({}, 0.1, m_material, 1);
+    generator.add_sphere({}, 0.1, m_material.get(), 1);
 
     m_geometry_object = geometry_pool->create_object({ generator.get_mesh() }, nullptr);
 }

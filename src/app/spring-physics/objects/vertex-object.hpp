@@ -8,15 +8,15 @@
 class VertexObject : public WorldObject {
 
     std::unique_ptr<PhysicsVertex> m_physics_vertex = nullptr;
-    GeometryObject* m_geometry_object = nullptr;
-    Material* m_material = nullptr;
+    std::unique_ptr<GeometryObject> m_geometry_object = nullptr;
+    std::unique_ptr<Material> m_material = nullptr;
 
 public:
     explicit VertexObject(World* world);
     ~VertexObject();
 
     PhysicsVertex* get_physics_vertex() { return m_physics_vertex.get(); }
-    GeometryObject* get_geometry_object() { return m_geometry_object; }
+    GeometryObject* get_geometry_object() { return m_geometry_object.get(); }
 
     void tick(float dt) override;
 
