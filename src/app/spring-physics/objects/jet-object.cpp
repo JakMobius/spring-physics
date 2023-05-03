@@ -4,7 +4,8 @@
 #include "../../../world/shape-generator.hpp"
 #include "../world.hpp"
 
-JetObject::JetObject(World *world, PhysicsVertex *head_vertex, PhysicsVertex *tail_vertex) : WorldObject(world) {
+JetObject::JetObject(World* world, PhysicsVertex* head_vertex, PhysicsVertex* tail_vertex)
+    : WorldObject(world) {
     m_world = world;
     m_physics_jet = std::make_unique<PhysicsJet>(head_vertex, tail_vertex);
     m_world->add_object(this);
@@ -14,11 +15,12 @@ JetObject::~JetObject() {
     m_world->remove_object(this);
 }
 
-void JetObject::create_colored_mesh(const Vec3f &color) {
+void JetObject::create_colored_mesh(const Vec3f& color) {
     // Just a cylinder for now
 
     auto geometry_pool = m_world->get_rendering_context()->m_geometry_pool.get();
-    if (!m_material) m_material = geometry_pool->create_material();
+    if (!m_material)
+        m_material = geometry_pool->create_material();
     m_material->set_color(color);
 
     ShapeGenerator shape_generator;
@@ -32,8 +34,8 @@ void JetObject::create_colored_mesh(const Vec3f &color) {
     Vec3f basis2 = {0, 0, 1};
 
     for (int i = 0; i < segments; i++) {
-        float angle = (float) i / (float) segments * 2.0f * M_PI;
-        float next_angle = (float) (i + 1) / (float) segments * 2.0f * M_PI;
+        float angle = (float)i / (float)segments * 2.0f * M_PI;
+        float next_angle = (float)(i + 1) / (float)segments * 2.0f * M_PI;
 
         Vec3f offset1 = (basis1 * cos(angle) + basis2 * sin(angle)) * radius;
         Vec3f offset2 = (basis1 * cos(next_angle) + basis2 * sin(next_angle)) * radius;
@@ -57,11 +59,23 @@ void JetObject::tick(float dt) {
     Vec3f tail = m_physics_jet->m_tail_vertex->m_position;
 
     Matrix4f transform({
-                               basis1.x, basis1.y, basis1.z, 0,
-                               basis2.x, basis2.y, basis2.z, 0,
-                               basis3.x, basis3.y, basis3.z, 0,
-                               tail.x, tail.y, tail.z, 1,
-                       });
+        basis1.x,
+        basis1.y,
+        basis1.z,
+        0,
+        basis2.x,
+        basis2.y,
+        basis2.z,
+        0,
+        basis3.x,
+        basis3.y,
+        basis3.z,
+        0,
+        tail.x,
+        tail.y,
+        tail.z,
+        1,
+    });
 
     float force_fraction = m_physics_jet->m_force / m_max_force;
     m_particles_accumulator += dt * force_fraction * m_particle_intensity;
@@ -75,18 +89,18 @@ void JetObject::tick(float dt) {
         float particle_time = m_particles_accumulator / force_fraction / m_particle_intensity;
 
         Vec3f current_particle_speed = flame_speed + velocity;
-        current_particle_speed += basis1 * (rand() / (float) RAND_MAX - 0.5f) * 0.5f;
-        current_particle_speed += basis2 * (rand() / (float) RAND_MAX - 0.5f) * 1.0f;
-        current_particle_speed += basis3 * (rand() / (float) RAND_MAX - 0.5f) * 1.0f;
+        current_particle_speed += basis1 * (rand() / (float)RAND_MAX - 0.5f) * 0.5f;
+        current_particle_speed += basis2 * (rand() / (float)RAND_MAX - 0.5f) * 1.0f;
+        current_particle_speed += basis3 * (rand() / (float)RAND_MAX - 0.5f) * 1.0f;
 
         Vec3f particle_position = tail - current_particle_speed * particle_time;
 
         m_world->get_particle_host()->add_particle({
-                   .m_position = particle_position,
-                   .m_velocity = current_particle_speed,
-                   .m_color = Vec4f(1, 1, 0.5, 1),
-                   .m_lifetime = 0.1f,
-           });
+            .m_position = particle_position,
+            .m_velocity = current_particle_speed,
+            .m_color = Vec4f(1, 1, 0.5, 1),
+            .m_lifetime = 0.1f,
+        });
 
         m_particles_accumulator -= 1.0f;
     }
@@ -102,6 +116,6 @@ float JetObject::get_max_force() const {
     return m_max_force;
 }
 
-PhysicsJet *JetObject::get_physics_jet() {
+PhysicsJet* JetObject::get_physics_jet() {
     return m_physics_jet.get();
 }

@@ -11,12 +11,16 @@ class VertexObject : public WorldObject {
     std::unique_ptr<GeometryObject> m_geometry_object = nullptr;
     std::unique_ptr<Material> m_material = nullptr;
 
-public:
+  public:
     explicit VertexObject(World* world);
     ~VertexObject();
 
-    PhysicsVertex* get_physics_vertex() { return m_physics_vertex.get(); }
-    GeometryObject* get_geometry_object() { return m_geometry_object.get(); }
+    PhysicsVertex* get_physics_vertex() {
+        return m_physics_vertex.get();
+    }
+    GeometryObject* get_geometry_object() {
+        return m_geometry_object.get();
+    }
 
     void tick(float dt) override;
 

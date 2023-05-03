@@ -8,23 +8,24 @@
 Vec3f Creature::get_center() const {
     Vec3f center = {0, 0, 0};
 
-    for (auto& vertex: m_vertices) {
+    for (auto& vertex : m_vertices) {
         center += vertex->get_physics_vertex()->m_position;
     }
 
-    center /= (float) m_vertices.size();
+    center /= (float)m_vertices.size();
 
     return center;
 }
 
-Creature::Creature(World *world, const CreatureConfig &config) : WorldObject(world) {
-    for (auto &vertex_config: config.m_vertices) {
+Creature::Creature(World* world, const CreatureConfig& config)
+    : WorldObject(world) {
+    for (auto& vertex_config : config.m_vertices) {
         auto vertex = std::make_unique<VertexObject>(world);
         vertex_config.apply(vertex.get());
         m_vertices.push_back(std::move(vertex));
     }
 
-    for (auto &spring_config: config.m_springs) {
+    for (auto& spring_config : config.m_springs) {
         auto spring = std::make_unique<SpringObject>(world);
         auto physics_spring = spring->get_physics_spring();
         spring_config.apply(spring.get());
@@ -36,24 +37,24 @@ Creature::Creature(World *world, const CreatureConfig &config) : WorldObject(wor
         m_springs.push_back(std::move(spring));
     }
 
-    for (auto &muscle_config: config.m_muscles) {
+    for (auto& muscle_config : config.m_muscles) {
         auto muscle = std::make_unique<Muscle>();
         muscle_config.apply(muscle.get(), m_springs[muscle_config.m_spring_index].get());
         m_muscles.push_back(std::move(muscle));
     }
 
-    for (auto &surface_config: config.m_surfaces) {
+    for (auto& surface_config : config.m_surfaces) {
         auto surface = std::make_unique<CreatureTriangleObject>(world,
-                                         m_vertices[surface_config.m_vertex_a_index]->get_physics_vertex(),
-                                         m_vertices[surface_config.m_vertex_b_index]->get_physics_vertex(),
-                                         m_vertices[surface_config.m_vertex_c_index]->get_physics_vertex());
+                                                                m_vertices[surface_config.m_vertex_a_index]->get_physics_vertex(),
+                                                                m_vertices[surface_config.m_vertex_b_index]->get_physics_vertex(),
+                                                                m_vertices[surface_config.m_vertex_c_index]->get_physics_vertex());
         m_surfaces.push_back(std::move(surface));
     }
 
-    for (auto &jet_config: config.m_jets) {
+    for (auto& jet_config : config.m_jets) {
         auto jet = std::make_unique<JetObject>(world,
-                                 m_vertices[jet_config.m_head_vertex_index]->get_physics_vertex(),
-                                 m_vertices[jet_config.m_tail_vertex_index]->get_physics_vertex());
+                                               m_vertices[jet_config.m_head_vertex_index]->get_physics_vertex(),
+                                               m_vertices[jet_config.m_tail_vertex_index]->get_physics_vertex());
         jet->set_max_force(jet_config.m_max_force);
         m_jet_objects.push_back(std::move(jet));
     }
@@ -68,9 +69,7 @@ Creature::~Creature() {
 }
 
 void Creature::tick(float dt) {
-
 }
 
 void Creature::physics_tick() {
-
 }

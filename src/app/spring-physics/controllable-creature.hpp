@@ -1,11 +1,11 @@
 #pragma once
 
-#include "creatures/creature.hpp"
 #include "../../utils/vec3.hpp"
+#include "creatures/creature.hpp"
 #include "world.hpp"
 
 class ControllableCreature {
-public:
+  public:
     ControllableCreature() = default;
     virtual ~ControllableCreature() = default;
 

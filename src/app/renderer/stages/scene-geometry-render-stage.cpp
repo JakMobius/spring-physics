@@ -49,7 +49,7 @@ void SceneGeometryRenderStage::create_graphics_pipeline() {
     auto vertex_shader = VK::ShaderModule::from_file(device, "resources/shaders/scene-geometry/vert.spv");
     auto fragment_shader = VK::ShaderModule::from_file(device, "resources/shaders/scene-geometry/frag.spv");
 
-    VK::PipelineFactory pipeline_factory {};
+    VK::PipelineFactory pipeline_factory{};
     pipeline_factory.m_shader_stages.add_shader(vertex_shader, VK_SHADER_STAGE_VERTEX_BIT);
     pipeline_factory.m_shader_stages.add_shader(fragment_shader, VK_SHADER_STAGE_FRAGMENT_BIT);
 
@@ -61,13 +61,13 @@ void SceneGeometryRenderStage::create_graphics_pipeline() {
     vertex_array_binding.add_attribute(SceneVertex::material_index_attribute);
 
     pipeline_factory.m_viewport_state.add_viewport(VK::Viewport(m_ctx.m_swapchain_extent));
-    pipeline_factory.m_viewport_state.add_scissor(VkRect2D {{0, 0}, m_ctx.m_swapchain_extent});
+    pipeline_factory.m_viewport_state.add_scissor(VkRect2D{{0, 0}, m_ctx.m_swapchain_extent});
 
     pipeline_factory.m_rasterization_state.set_cull_mode(VK_CULL_MODE_BACK_BIT);
     pipeline_factory.m_rasterization_state.set_front_face(VK_FRONT_FACE_COUNTER_CLOCKWISE);
     pipeline_factory.m_multisampling_state.set_rasterization_samples(msaa_samples);
 
-    VK::PipelineColorAttachmentState pipeline_color_attachment_states {};
+    VK::PipelineColorAttachmentState pipeline_color_attachment_states{};
 
     pipeline_factory.m_color_blend_state_create_info.add_color_attachment(pipeline_color_attachment_states);
 
@@ -81,12 +81,12 @@ void SceneGeometryRenderStage::create_graphics_pipeline() {
     push_constant.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
 
     VkDescriptorSetLayout descriptors[]{
-            m_ctx.m_transforms_descriptor_set_layout.get_handle(),
-            m_ctx.m_materials_descriptor_set_layout.get_handle(),
-            m_ctx.m_shadowing_descriptor_set_layout.get_handle(),
+        m_ctx.m_transforms_descriptor_set_layout.get_handle(),
+        m_ctx.m_materials_descriptor_set_layout.get_handle(),
+        m_ctx.m_shadowing_descriptor_set_layout.get_handle(),
     };
 
-    VkPushConstantRange push_constants[] { push_constant };
+    VkPushConstantRange push_constants[]{push_constant};
 
     m_pipeline_layout = VK::PipelineLayout::create(&window.get_device(), descriptors, push_constants);
     m_pipeline = pipeline_factory.create(m_pipeline_layout, m_render_pass);
@@ -99,19 +99,19 @@ void SceneGeometryRenderStage::handle_swapchain_update() {
 
 void SceneGeometryRenderStage::record_command_buffer(VK::CommandBuffer& command_buffer) {
 
-    VkClearValue clear_values[2] {};
+    VkClearValue clear_values[2]{};
     clear_values[0].color = {{m_ctx.m_clear_color[0], m_ctx.m_clear_color[1], m_ctx.m_clear_color[2], 1.0f}};
     clear_values[1].depthStencil = {1.0f, 0};
 
     auto vertex_buffer = m_ctx.m_vertex_buffer.get();
 
     VkDescriptorSet descriptors[]{
-            m_ctx.m_scene_descriptor_set_array->get_descriptor_sets()[0], // transforms
-            m_ctx.m_scene_descriptor_set_array->get_descriptor_sets()[1], // materials
-            m_ctx.m_scene_descriptor_set_array->get_descriptor_sets()[2], // shadow
+        m_ctx.m_scene_descriptor_set_array->get_descriptor_sets()[0], // transforms
+        m_ctx.m_scene_descriptor_set_array->get_descriptor_sets()[1], // materials
+        m_ctx.m_scene_descriptor_set_array->get_descriptor_sets()[2], // shadow
     };
-    VkBuffer vertex_buffers[] = { vertex_buffer->get_buffer()->get_buffer().get_handle() };
-    VkDeviceSize offsets[] = { 0 };
+    VkBuffer vertex_buffers[] = {vertex_buffer->get_buffer()->get_buffer().get_handle()};
+    VkDeviceSize offsets[] = {0};
 
     VK::RenderPassBeginInfo main_render_pass_begin_info(m_render_pass);
     main_render_pass_begin_info.set_framebuffer(m_framebuffer);
@@ -129,8 +129,8 @@ void SceneGeometryRenderStage::record_command_buffer(VK::CommandBuffer& command_
     auto& sizes = m_ctx.m_geometry_pool->get_size_array();
     auto& indices = m_ctx.m_geometry_pool->get_start_indices();
 
-    for(int i = 0; i < sizes.size(); i++) {
-      command_buffer.draw(sizes[i], 1, indices[i], 0);
+    for (int i = 0; i < sizes.size(); i++) {
+        command_buffer.draw(sizes[i], 1, indices[i], 0);
     }
 
     command_buffer.end_render_pass();
@@ -148,8 +148,8 @@ void SceneGeometryRenderStage::update_push_constants() {
     auto& camera_matrix = m_ctx.m_camera->get_matrix().m_data;
 
     memcpy(&m_push_constants.matrix, &camera_matrix, sizeof(camera_matrix));
-    m_push_constants.viewport_size[0] = (float) extent.width;
-    m_push_constants.viewport_size[1] = (float) extent.height;
+    m_push_constants.viewport_size[0] = (float)extent.width;
+    m_push_constants.viewport_size[1] = (float)extent.height;
 
     m_push_constants.ambient_color[0] = m_ctx.m_ambient_color[0];
     m_push_constants.ambient_color[1] = m_ctx.m_ambient_color[1];

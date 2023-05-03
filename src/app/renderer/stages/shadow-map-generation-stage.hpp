@@ -1,6 +1,5 @@
 #pragma once
 
-#include "stage.hpp"
 #include "../../camera/orthogonal_camera.hpp"
 #include "../rendering-context.hpp"
 #include "../scene-buffer.hpp"
@@ -8,6 +7,7 @@
 #include "etna/command-queue/command-queue-pool.hpp"
 #include "etna/image-factory.hpp"
 #include "etna/image.hpp"
+#include "stage.hpp"
 
 struct ShadowMapPushConstants {
     float matrix[16];
@@ -15,8 +15,9 @@ struct ShadowMapPushConstants {
 };
 
 class ShadowMapGenerationStage : public Stage {
-public:
-    explicit ShadowMapGenerationStage(RenderingContext& ctx) : m_ctx(ctx) {
+  public:
+    explicit ShadowMapGenerationStage(RenderingContext& ctx)
+        : m_ctx(ctx) {
         m_shadow_map_size.width = (uint32_t)m_ctx.m_shadow_map_size;
         m_shadow_map_size.height = (uint32_t)m_ctx.m_shadow_map_size;
         create_depth_image();
@@ -27,7 +28,7 @@ public:
     void record_command_buffer(VK::CommandBuffer& command_buffer) override;
     void prepare_for_frame() override;
 
-private:
+  private:
     void create_depth_image();
     void create_render_pass();
     void create_graphics_pipeline();
@@ -38,7 +39,7 @@ private:
 
     RenderingContext& m_ctx;
 
-    VkExtent2D m_shadow_map_size {};
+    VkExtent2D m_shadow_map_size{};
     VK::RenderPass m_render_pass{};
     VK::MemoryImage m_depth_image{};
     std::vector<VK::Framebuffer> m_framebuffers{};

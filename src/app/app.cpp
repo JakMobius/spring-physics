@@ -20,7 +20,7 @@ void App::initialize() {
 }
 
 void App::main_loop() {
-    while(m_window->is_opened()) {
+    while (m_window->is_opened()) {
         m_window->poll_events();
         m_scene->tick();
     }

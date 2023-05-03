@@ -1,6 +1,5 @@
 #pragma once
 
-#include "stage.hpp"
 #include "../rendering-context.hpp"
 #include "../scene-buffer.hpp"
 #include "etna/basic-attachment-manager.hpp"
@@ -8,6 +7,7 @@
 #include "etna/image-factory.hpp"
 #include "etna/image.hpp"
 #include "etna/vk-wrappers.hpp"
+#include "stage.hpp"
 
 struct ParticlesPushConstants {
     float matrix[16];
@@ -16,15 +16,16 @@ struct ParticlesPushConstants {
 };
 
 class ParticlesStage : public Stage {
-public:
-    explicit ParticlesStage(RenderingContext& ctx) : m_ctx(ctx) {}
+  public:
+    explicit ParticlesStage(RenderingContext& ctx)
+        : m_ctx(ctx) {}
 
     void initialize() override;
     void handle_swapchain_update() override;
     void record_command_buffer(VK::CommandBuffer& command_buffer) override;
     void prepare_for_frame() override;
 
-private:
+  private:
     void update_push_constants();
     void create_render_pass();
     void create_graphics_pipeline();

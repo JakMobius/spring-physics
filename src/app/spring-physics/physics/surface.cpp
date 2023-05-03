@@ -34,7 +34,7 @@ void PhysicsSurface::force_tick() const {
     m_vertex_c->m_force += force;
 }
 
-PhysicsSurface::PhysicsSurface(PhysicsVertex *vertex_a, PhysicsVertex *vertex_b, PhysicsVertex *vertex_c) {
+PhysicsSurface::PhysicsSurface(PhysicsVertex* vertex_a, PhysicsVertex* vertex_b, PhysicsVertex* vertex_c) {
     m_vertex_a = vertex_a;
     m_vertex_b = vertex_b;
     m_vertex_c = vertex_c;

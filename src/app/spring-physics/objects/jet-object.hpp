@@ -13,8 +13,8 @@ class JetObject : public WorldObject {
     float m_max_force = 1.0f;
     float m_particles_accumulator = 0.0f;
     float m_particle_intensity = 300.0f; // Particles per second on max thrust
-public:
-    JetObject(World *world, PhysicsVertex *head_vertex, PhysicsVertex *tail_vertex);
+  public:
+    JetObject(World* world, PhysicsVertex* head_vertex, PhysicsVertex* tail_vertex);
 
     ~JetObject() override;
 
@@ -24,7 +24,7 @@ public:
 
     void tick(float dt) override;
 
-    void create_colored_mesh(const Vec3f &color);
+    void create_colored_mesh(const Vec3f& color);
 
-    PhysicsJet *get_physics_jet();
+    PhysicsJet* get_physics_jet();
 };

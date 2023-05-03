@@ -10,11 +10,11 @@ void RenderingContext::create_sync_objects() {
 
 void RenderingContext::create_descriptor_pool() {
     m_descriptor_pool = VK::DescriptorPoolFactory()
-                                .add_pool_size(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 2)
-                                .add_pool_size(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 2)
-                                .set_flags(VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT)
-                                .set_max_sets(4)
-                                .create(&m_gpu_window.get_device());
+                            .add_pool_size(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 2)
+                            .add_pool_size(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 2)
+                            .set_flags(VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT)
+                            .set_max_sets(4)
+                            .create(&m_gpu_window.get_device());
 }
 
 void RenderingContext::create_descriptor_sets() {
@@ -31,9 +31,9 @@ void RenderingContext::create_descriptor_sets() {
 
 VkFormat RenderingContext::find_depth_format() {
     return m_gpu_window.get_device().get_physical_device()->find_supported_format(
-            {VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT},
-            VK_IMAGE_TILING_OPTIMAL,
-            VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
+        {VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT},
+        VK_IMAGE_TILING_OPTIMAL,
+        VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
 }
 
 void RenderingContext::create_transform_buffer() {
@@ -67,19 +67,19 @@ void RenderingContext::initialize() {
     m_msaa_samples = m_gpu_window.get_device().get_physical_device()->get_max_usable_sample_count();
 
     m_command_pool = VK::CommandPool::create(
-            &m_gpu_window.get_device(),
-            m_gpu_window.get_graphics_queue_family(),
-            VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT);
+        &m_gpu_window.get_device(),
+        m_gpu_window.get_graphics_queue_family(),
+        VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT);
 
     m_graphics_command_queue_pool = std::make_unique<Etna::CommandQueuePool>(m_command_pool, m_gpu_window.get_device_graphics_queue());
 
     VK::UnownedSurface surface = m_gpu_window.get_vk_surface();
 
-    m_surface_format = VkSurfaceFormatKHR({ VK_FORMAT_B8G8R8A8_UNORM, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR });
+    m_surface_format = VkSurfaceFormatKHR({VK_FORMAT_B8G8R8A8_UNORM, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR});
 
     auto physical_device = m_gpu_window.get_device().get_physical_device();
-    if(!physical_device->supports_surface_format(surface, m_surface_format)) {
-      m_surface_format = physical_device->get_supported_surface_formats(surface)[0];
+    if (!physical_device->supports_surface_format(surface, m_surface_format)) {
+        m_surface_format = physical_device->get_supported_surface_formats(surface)[0];
     }
 
     m_render_command_buffer = m_command_pool.create_command_buffer();
@@ -133,20 +133,20 @@ void RenderingContext::create_descriptor_set_layouts() {
     shadow_mapping_binding.set_stage_flags(VK_SHADER_STAGE_FRAGMENT_BIT);
 
     m_transforms_descriptor_set_layout = VK::DescriptorSetLayoutFactory()
-                                                 .bind_descriptor(0, transform_binding)
-                                                 .create(&m_gpu_window.get_device());
+                                             .bind_descriptor(0, transform_binding)
+                                             .create(&m_gpu_window.get_device());
 
     m_materials_descriptor_set_layout = VK::DescriptorSetLayoutFactory()
-                                                .bind_descriptor(0, material_binding)
-                                                .create(&m_gpu_window.get_device());
+                                            .bind_descriptor(0, material_binding)
+                                            .create(&m_gpu_window.get_device());
 
     m_shadowing_descriptor_set_layout = VK::DescriptorSetLayoutFactory()
-                                                .bind_descriptor(0, shadowing_binding)
-                                                .create(&m_gpu_window.get_device());
+                                            .bind_descriptor(0, shadowing_binding)
+                                            .create(&m_gpu_window.get_device());
 
     m_shadow_mapping_descriptor_set_layout = VK::DescriptorSetLayoutFactory()
-                                                     .bind_descriptor(0, shadow_mapping_binding)
-                                                     .create(&m_gpu_window.get_device());
+                                                 .bind_descriptor(0, shadow_mapping_binding)
+                                                 .create(&m_gpu_window.get_device());
 }
 
 void RenderingContext::handle_swapchain_update() {
@@ -167,7 +167,7 @@ void RenderingContext::create_swapchain() {
     m_swapchain_extent = swapchain_capabilities.clamp_image_extent(size.x, size.y);
     uint32_t image_count = swapchain_capabilities.get_optimal_chain_image_count();
 
-    if(physical_device->supports_surface_present_mode(surface, VK_PRESENT_MODE_MAILBOX_KHR)) {
+    if (physical_device->supports_surface_present_mode(surface, VK_PRESENT_MODE_MAILBOX_KHR)) {
         factory.set_present_mode(VK_PRESENT_MODE_MAILBOX_KHR);
     } else {
         factory.set_present_mode(VK_PRESENT_MODE_FIFO_KHR);
@@ -186,7 +186,7 @@ void RenderingContext::create_swapchain() {
     uint32_t graphics_queue_family = m_gpu_window.get_graphics_queue_family();
     uint32_t present_queue_family = m_gpu_window.get_present_queue_family();
 
-    if(graphics_queue_family != present_queue_family) {
+    if (graphics_queue_family != present_queue_family) {
         factory.set_image_sharing_mode(VK_SHARING_MODE_CONCURRENT);
         factory.get_queue_family_indices().assign({graphics_queue_family, present_queue_family});
     } else {
@@ -242,18 +242,18 @@ void RenderingContext::create_depth_color_images() {
     auto& window = m_gpu_window;
 
     auto color_image_factory = Etna::ImageFactory()
-                                       .set_samples(m_msaa_samples)
-                                       .set_extent({m_swapchain_extent.width, m_swapchain_extent.height, 1})
-                                       .set_format(m_surface_format.format)
-                                       .set_usage(VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT)
-                                       .set_aspect_mask(VK_IMAGE_ASPECT_COLOR_BIT);
+                                   .set_samples(m_msaa_samples)
+                                   .set_extent({m_swapchain_extent.width, m_swapchain_extent.height, 1})
+                                   .set_format(m_surface_format.format)
+                                   .set_usage(VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT)
+                                   .set_aspect_mask(VK_IMAGE_ASPECT_COLOR_BIT);
 
     auto depth_image_factory = Etna::ImageFactory()
-                                       .set_samples(m_msaa_samples)
-                                       .set_extent({m_swapchain_extent.width, m_swapchain_extent.height, 1})
-                                       .set_format(depth_format)
-                                       .set_usage(VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT)
-                                       .set_aspect_mask(VK_IMAGE_ASPECT_DEPTH_BIT);
+                                   .set_samples(m_msaa_samples)
+                                   .set_extent({m_swapchain_extent.width, m_swapchain_extent.height, 1})
+                                   .set_format(depth_format)
+                                   .set_usage(VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT)
+                                   .set_aspect_mask(VK_IMAGE_ASPECT_DEPTH_BIT);
 
     m_color_image = std::make_unique<Etna::Image>(color_image_factory, &window.get_device());
     m_depth_image = std::make_unique<Etna::Image>(depth_image_factory, &window.get_device());

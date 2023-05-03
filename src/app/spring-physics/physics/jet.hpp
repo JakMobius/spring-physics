@@ -6,7 +6,8 @@ struct PhysicsJet {
     PhysicsVertex* m_head_vertex = nullptr;
     PhysicsVertex* m_tail_vertex = nullptr;
     float m_force = 0.0f;
-public:
+
+  public:
     PhysicsJet(PhysicsVertex* head_vertex, PhysicsVertex* tail_vertex);
 
     void set_force(float force);

@@ -8,17 +8,15 @@ std::unique_ptr<TerrainPolygon> Terrain::add_triangle(Vec3f vertex_a, Vec3f vert
     return triangle;
 }
 
-void Terrain::destroy_triangle(TerrainPolygon *triangle) {
-    auto it = std::find_if(m_surface_mesh.begin(), m_surface_mesh.end(), [triangle](const auto& t) {
-        return t == triangle;
-    });
+void Terrain::destroy_triangle(TerrainPolygon* triangle) {
+    auto it = std::find(m_surface_mesh.begin(), m_surface_mesh.end(), triangle);
     if (it != m_surface_mesh.end()) {
         m_surface_mesh.erase(it);
         bvh_valid = false;
     }
 }
 
-std::vector<TerrainPolygon*> &Terrain::get_surface_mesh() {
+std::vector<TerrainPolygon*>& Terrain::get_surface_mesh() {
     return m_surface_mesh;
 }
 
@@ -33,7 +31,7 @@ void Terrain::ensure_valid() {
     }
 }
 
-void Terrain::query(const Vec3f &from, const Vec3f &to, std::vector<TerrainPolygon *> &result) {
+void Terrain::query(const Vec3f& from, const Vec3f& to, std::vector<TerrainPolygon*>& result) {
     assert(bvh_valid);
     m_bvh.query(m_bvh.m_root, m_bvh.get_min(from, to), m_bvh.get_max(from, to), result);
 }

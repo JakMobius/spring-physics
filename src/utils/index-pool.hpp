@@ -2,17 +2,18 @@
 
 #include <stack>
 
-template<typename T>
+template <typename T>
 class IndexPool {
 
-    std::stack<T> unused {};
+    std::stack<T> unused{};
     T next = 0;
 
-public:
+  public:
     IndexPool() {}
 
     T get_next() {
-        if(unused.empty()) return next++;
+        if (unused.empty())
+            return next++;
         T result = unused.top();
         unused.pop();
         return result;

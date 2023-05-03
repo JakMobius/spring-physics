@@ -8,13 +8,14 @@ class App;
 #include "spring-physics/game-scene.hpp"
 
 class App : public GeneralApp {
-    std::unique_ptr<Window> m_window {};
-    std::unique_ptr<GpuWindow> m_gpu_window {};
-    std::unique_ptr<GameScene> m_scene {};
-public:
+    std::unique_ptr<Window> m_window{};
+    std::unique_ptr<GpuWindow> m_gpu_window{};
+    std::unique_ptr<GameScene> m_scene{};
+
+  public:
     App() = default;
 
-    void configure(VK::InstanceFactory &factory) override {
+    void configure(VK::InstanceFactory& factory) override {
         GeneralApp::configure(factory);
         factory.get_enabled_layer_names().push_back("VK_LAYER_KHRONOS_validation");
     }

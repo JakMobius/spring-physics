@@ -17,19 +17,19 @@ class GeometryPool {
     const int material_stride = 8;
     const int transform_stride = 16;
 
-    std::vector<unsigned int> start_indices {};
-    std::vector<unsigned int> size_array {};
+    std::vector<unsigned int> start_indices{};
+    std::vector<unsigned int> size_array{};
 
     // TODO: It seems that these two identical field groups could be wrapped in some nice fancy structures
 
-    IndexPool<int> m_matrix_buffer_index_pool {};
-    std::unordered_set<GeometryObject*> m_dirty_transform_objects {};
+    IndexPool<int> m_matrix_buffer_index_pool{};
+    std::unordered_set<GeometryObject*> m_dirty_transform_objects{};
 
-    IndexPool<int> m_material_buffer_index_pool {};
-    std::unordered_set<Material*> m_dirty_materials {};
+    IndexPool<int> m_material_buffer_index_pool{};
+    std::unordered_set<Material*> m_dirty_materials{};
 
-    std::list<GeometryObject*> m_objects {};
-    std::unordered_set<Material*> m_materials {};
+    std::list<GeometryObject*> m_objects{};
+    std::unordered_set<Material*> m_materials{};
 
     GeometryObject* m_defragmented_elements = nullptr;
 
@@ -50,16 +50,21 @@ class GeometryPool {
     int create_matrix();
     void copy_matrix(int index, const Matrix4f& matrix);
 
-public:
+  public:
+    const std::vector<unsigned int>& get_start_indices() {
+        return start_indices;
+    };
+    const std::vector<unsigned int>& get_size_array() {
+        return size_array;
+    };
 
-    const std::vector<unsigned int>& get_start_indices() { return start_indices; };
-    const std::vector<unsigned int>& get_size_array() { return size_array; };
-
-    int get_object_count() { return m_objects.size(); }
+    int get_object_count() {
+        return m_objects.size();
+    }
 
     GeometryPool(RenderingContext* drawer);
 
-    std::unique_ptr<GeometryObject> create_object(const GeometryObjectConfig &object_config, GeometryObject* parent);
+    std::unique_ptr<GeometryObject> create_object(const GeometryObjectConfig& object_config, GeometryObject* parent);
     void destroy_object(GeometryObject* object);
 
     SceneStorageBuffer* get_vertex_buffer();

@@ -17,17 +17,21 @@
 #include <etna/command-queue/command-queue-pool.hpp>
 
 class SceneRenderer : public BaseRenderer {
-public:
+  public:
     explicit SceneRenderer(GpuWindow& window);
-    ~SceneRenderer() { wait_idle(); }
+    ~SceneRenderer() {
+        wait_idle();
+    }
 
     void draw();
     void wait_idle();
     void initialize() override;
 
-    RenderingContext* get_rendering_context() { return &m_rendering_context; }
+    RenderingContext* get_rendering_context() {
+        return &m_rendering_context;
+    }
 
-private:
+  private:
     void draw_frame();
 
     void prepare_for_frame() override;

@@ -1,18 +1,18 @@
 #pragma once
 
-#include <vector>
 #include "../objects/surface-triangle-object.hpp"
 #include "terrain-bvh.hpp"
+#include <vector>
 
 class World;
 
 class Terrain {
-    std::vector<TerrainPolygon*> m_surface_mesh {};
+    std::vector<TerrainPolygon*> m_surface_mesh{};
 
     TerrainBVH m_bvh;
     bool bvh_valid = false;
 
-public:
+  public:
     Terrain() {}
 
     std::unique_ptr<TerrainPolygon> add_triangle(Vec3f vertex_a, Vec3f vertex_b, Vec3f vertex_c);

@@ -15,17 +15,21 @@ class CreatureTriangleObject : public WorldObject {
     std::unique_ptr<GeometryObject> m_geometry_object = nullptr;
     std::unique_ptr<Material> m_material = nullptr;
 
-public:
-    explicit CreatureTriangleObject(World *world, PhysicsVertex *vertex_a, PhysicsVertex *vertex_b,
-                                    PhysicsVertex *vertex_c);
+  public:
+    explicit CreatureTriangleObject(World* world, PhysicsVertex* vertex_a, PhysicsVertex* vertex_b,
+                                    PhysicsVertex* vertex_c);
 
     ~CreatureTriangleObject();
 
-    GeometryObject *get_geometry_object() { return m_geometry_object.get(); }
+    GeometryObject* get_geometry_object() {
+        return m_geometry_object.get();
+    }
 
     void tick(float dt) override;
 
-    PhysicsSurface *get_physics_surface() { return m_physics_triangle.get(); }
+    PhysicsSurface* get_physics_surface() {
+        return m_physics_triangle.get();
+    }
 
-    void create_colored_mesh(const Vec3f &color);
+    void create_colored_mesh(const Vec3f& color);
 };

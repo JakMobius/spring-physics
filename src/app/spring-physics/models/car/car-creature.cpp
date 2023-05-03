@@ -1,11 +1,12 @@
 
 #include "car-creature.hpp"
-#include "../builder/model-builder.hpp"
 #include "../builder/full-cube.hpp"
+#include "../builder/model-builder.hpp"
 #include "../builder/wheel.hpp"
 #include "car-factory.hpp"
 
-CarCreature::CarCreature(World *world, const Matrix4f& transform): m_world(world) {
+CarCreature::CarCreature(World* world, const Matrix4f& transform)
+    : m_world(world) {
     ModelBuilder::Builder builder;
 
     builder.get_state().set_matrix(transform);
@@ -44,10 +45,7 @@ void CarCreature::set_controls(Vec3f controls) {
     m_creature->get_jet_objects()[1]->get_physics_jet()->m_force = m_creature->get_jet_objects()[1]->get_max_force() * forward;
     m_creature->get_jet_objects()[2]->get_physics_jet()->m_force = m_creature->get_jet_objects()[2]->get_max_force() * backward;
     m_creature->get_jet_objects()[3]->get_physics_jet()->m_force = m_creature->get_jet_objects()[3]->get_max_force() * backward;
-
-
 }
 
 void CarCreature::set_throttle(float throttle) {
-
 }

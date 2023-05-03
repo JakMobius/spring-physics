@@ -2,7 +2,7 @@
 #include "material.hpp"
 #include "geometry-pool.hpp"
 
-void Material::set_color(const Vec3f &color) {
+void Material::set_color(const Vec3f& color) {
     m_color = color;
     m_geometry_pool->update_material_delayed(this);
 }
@@ -18,7 +18,7 @@ void Material::set_specular_factor(float factor) {
 }
 
 Material::~Material() {
-    if(m_geometry_pool) {
+    if (m_geometry_pool) {
         m_geometry_pool->destroy_material(this);
     }
 }

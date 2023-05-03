@@ -3,7 +3,7 @@
 #include "../../../../utils/get-orthogonal.hpp"
 
 ModelBuilder::Wheel
-ModelBuilder::build_wheel(ModelBuilder::Builder &builder, int anchor1, int anchor2, float radius, int steps, float alpha) {
+ModelBuilder::build_wheel(ModelBuilder::Builder& builder, int anchor1, int anchor2, float radius, int steps, float alpha) {
     Wheel wheel{};
 
     wheel.anchor1 = anchor1;
@@ -19,8 +19,7 @@ ModelBuilder::build_wheel(ModelBuilder::Builder &builder, int anchor1, int ancho
     for (int i = 0; i < steps; i++) {
         int node = builder.vertex(center_position +
                                   basis1 * (radius * cos(2 * M_PI * i / steps)) +
-                                  basis2 * (radius * sin(2 * M_PI * i / steps))
-        );
+                                  basis2 * (radius * sin(2 * M_PI * i / steps)));
         builder.spring(wheel.anchor1, node);
         builder.spring(wheel.anchor2, node);
 

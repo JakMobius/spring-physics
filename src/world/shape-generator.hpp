@@ -6,11 +6,11 @@
 
 class ShapeGenerator {
 
-    std::vector<SceneVertex> m_mesh {};
+    std::vector<SceneVertex> m_mesh{};
 
     void increase_sphere_details(std::vector<Vec3f>& sphere) {
         auto sphere_size = sphere.size();
-        for(int j = 0; j < sphere_size; j += 3) {
+        for (int j = 0; j < sphere_size; j += 3) {
             Vec3f v0 = sphere[j + 0];
             Vec3f v1 = sphere[j + 1];
             Vec3f v2 = sphere[j + 2];
@@ -42,21 +42,22 @@ class ShapeGenerator {
         }
     }
 
-public:
-
-    std::vector<SceneVertex> &get_mesh() { return m_mesh; }
+  public:
+    std::vector<SceneVertex>& get_mesh() {
+        return m_mesh;
+    }
 
     void reset();
 
-    void add_triangle(const Vec3f &p1, const Vec3f &p2, const Vec3f &p3, Material* material);
+    void add_triangle(const Vec3f& p1, const Vec3f& p2, const Vec3f& p3, Material* material);
 
-    void add_square(const Vec3f &p1, const Vec3f &p2, const Vec3f &p3, const Vec3f &p4, Material* material);
+    void add_square(const Vec3f& p1, const Vec3f& p2, const Vec3f& p3, const Vec3f& p4, Material* material);
 
-    void add_cube(const Vec3f &center, const Vec3f &size, Material* material);
+    void add_cube(const Vec3f& center, const Vec3f& size, Material* material);
 
-    void add_cube(const Vec3f &center, const Vec3f &size, Material* materials[6]);
+    void add_cube(const Vec3f& center, const Vec3f& size, Material* materials[6]);
 
-    void add_sphere(const Vec3f &center, float radius, Material* material, int lod = 1);
+    void add_sphere(const Vec3f& center, float radius, Material* material, int lod = 1);
 
-    void add_vertex(const Vec3f &position, const Vec3f &normal, const Vec2f& uv, Material* material);
+    void add_vertex(const Vec3f& position, const Vec3f& normal, const Vec2f& uv, Material* material);
 };

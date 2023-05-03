@@ -5,7 +5,7 @@
 
 template <typename ValueType>
 class Matrix3 {
-public:
+  public:
     ValueType data[9];
 
     Matrix3();
@@ -47,30 +47,31 @@ template <typename ValueType>
 Matrix3<ValueType>::~Matrix3() {}
 
 template <typename ValueType>
-Matrix3<ValueType>::Matrix3(const Matrix3<ValueType> &other) {
+Matrix3<ValueType>::Matrix3(const Matrix3<ValueType>& other) {
     set(other.data);
 }
 
 template <typename ValueType>
-Matrix3<ValueType>& Matrix3<ValueType>::operator=(const Matrix3<ValueType> &other) {
-    if (this == &other) return *this;
+Matrix3<ValueType>& Matrix3<ValueType>::operator=(const Matrix3<ValueType>& other) {
+    if (this == &other)
+        return *this;
     set(other.data);
     return *this;
 }
 
 template <typename ValueType>
-void Matrix3<ValueType>::multiply(const Matrix3<ValueType> &other) {
+void Matrix3<ValueType>::multiply(const Matrix3<ValueType>& other) {
     this->set(multiplied(other).data);
 }
 
 template <typename ValueType>
-Matrix3<ValueType> Matrix3<ValueType>::multiplied(const Matrix3<ValueType> &other) const {
+Matrix3<ValueType> Matrix3<ValueType>::multiplied(const Matrix3<ValueType>& other) const {
     Matrix3<ValueType> result;
 
     for (int i = 0; i < 3; i++) {
-        for (int j = 0; j < 3; j++){
+        for (int j = 0; j < 3; j++) {
             result.data[i * 3 + j] = 0;
-            for (int k = 0; k < 3; k++){
+            for (int k = 0; k < 3; k++) {
                 result.data[i * 3 + j] += data[i * 3 + k] * other.data[k * 3 + j];
             }
         }
@@ -80,13 +81,15 @@ Matrix3<ValueType> Matrix3<ValueType>::multiplied(const Matrix3<ValueType> &othe
 }
 
 template <typename ValueType>
-Matrix3<ValueType>::Matrix3(const ValueType (&data)[9]): data() {
+Matrix3<ValueType>::Matrix3(const ValueType (&data)[9])
+    : data() {
     set(data);
 }
 
 template <typename ValueType>
 void Matrix3<ValueType>::set(const ValueType (&other)[9]) {
-    for(int i = 0; i < 9; i++) data[i] = other[i];
+    for (int i = 0; i < 9; i++)
+        data[i] = other[i];
 }
 
 template <typename ValueType>
@@ -97,13 +100,15 @@ Matrix3<ValueType> Matrix3<ValueType>::inverse() const {
     ValueType d = 1.0f / (data[0] * t00 - data[3] * t10 + data[6] * t20);
 
     ValueType new_data[9] = {
-            d * t00, -d * t10, d * t20,
-            -d * (data[3] * data[8] - data[5] * data[6]),
-            d *  (data[0] * data[8] - data[2] * data[6]),
-            -d * (data[0] * data[5] - data[2] * data[3]),
-            d *  (data[3] * data[7] - data[4] * data[6]),
-            -d * (data[0] * data[7] - data[1] * data[6]),
-            d *  (data[0] * data[4] - data[1] * data[3]),
+        d * t00,
+        -d * t10,
+        d * t20,
+        -d * (data[3] * data[8] - data[5] * data[6]),
+        d * (data[0] * data[8] - data[2] * data[6]),
+        -d * (data[0] * data[5] - data[2] * data[3]),
+        d * (data[3] * data[7] - data[4] * data[6]),
+        -d * (data[0] * data[7] - data[1] * data[6]),
+        d * (data[0] * data[4] - data[1] * data[3]),
     };
 
     return Matrix3<ValueType>(new_data);
@@ -112,10 +117,9 @@ Matrix3<ValueType> Matrix3<ValueType>::inverse() const {
 template <typename ValueType>
 Matrix3<ValueType> Matrix3<ValueType>::scale_matrix(ValueType sx, ValueType sy) {
     ValueType scale_matrix_data[9] = {
-            sx, 0, 0,
-            0, sy, 0,
-            0, 0, 1
-    };
+        sx, 0, 0,
+        0, sy, 0,
+        0, 0, 1};
 
     return Matrix3<ValueType>(scale_matrix_data);
 }
@@ -126,10 +130,9 @@ Matrix3<ValueType> Matrix3<ValueType>::rotation_matrix(ValueType angle) {
     ValueType cosine = cos(angle);
 
     ValueType rotation_matrix_data[9] = {
-            cosine, -sine, 0,
-            sine, cosine, 0,
-            0, 0, 1
-    };
+        cosine, -sine, 0,
+        sine, cosine, 0,
+        0, 0, 1};
 
     return Matrix3<ValueType>(rotation_matrix_data);
 }
@@ -137,10 +140,9 @@ Matrix3<ValueType> Matrix3<ValueType>::rotation_matrix(ValueType angle) {
 template <typename ValueType>
 Matrix3<ValueType> Matrix3<ValueType>::translation_matrix(ValueType tx, ValueType ty) {
     ValueType translation_matrix_data[9] = {
-            1, 0, 0,
-            0, 1, 0,
-            tx, ty, 1
-    };
+        1, 0, 0,
+        0, 1, 0,
+        tx, ty, 1};
 
     return Matrix3<ValueType>(translation_matrix_data);
 }
@@ -162,7 +164,7 @@ void Matrix3<ValueType>::translate(ValueType tx, ValueType ty) {
 
 template <typename ValueType>
 void Matrix3<ValueType>::reset() {
-    ValueType default_data[9] = { 1, 0, 0, 0, 1, 0, 0, 0, 1 };
+    ValueType default_data[9] = {1, 0, 0, 0, 1, 0, 0, 0, 1};
     set(default_data);
 }
 

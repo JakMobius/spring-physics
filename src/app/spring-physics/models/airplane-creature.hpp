@@ -4,7 +4,7 @@
 #include "../creatures/creature.hpp"
 
 class AirplaneCreature : public ControllableCreature {
-public:
+  public:
     AirplaneCreature(World* world, const Matrix4f& transform);
     virtual ~AirplaneCreature() = default;
 

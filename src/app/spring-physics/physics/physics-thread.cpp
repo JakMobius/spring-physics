@@ -4,43 +4,44 @@
 
 #include "physics-thread.hpp"
 
-PhysicsThread::PhysicsThread(ConcurrentPhysicsEngine *engine) : AsyncTask(), m_engine(engine) {}
+PhysicsThread::PhysicsThread(ConcurrentPhysicsEngine* engine)
+    : AsyncTask(), m_engine(engine) {}
 
 void PhysicsThread::save_forces() {
-    for (auto &creature: m_creatures) {
-        for (auto &vertex: creature->get_vertices()) {
+    for (auto& creature : m_creatures) {
+        for (auto& vertex : creature->get_vertices()) {
             vertex->get_physics_vertex()->m_step_force = vertex->get_physics_vertex()->m_force;
         }
     }
 }
 
 void PhysicsThread::restore_forces() {
-    for (auto &creature: m_creatures) {
-        for (auto &vertex: creature->get_vertices()) {
+    for (auto& creature : m_creatures) {
+        for (auto& vertex : creature->get_vertices()) {
             vertex->get_physics_vertex()->m_force = vertex->get_physics_vertex()->m_step_force;
         }
     }
 }
 
 void PhysicsThread::clear_forces() {
-    for (auto &creature: m_creatures) {
-        for (auto &vertex: creature->get_vertices()) {
+    for (auto& creature : m_creatures) {
+        for (auto& vertex : creature->get_vertices()) {
             vertex->get_physics_vertex()->m_force = Vec3f(0, 0, 0);
         }
     }
 }
 
 void PhysicsThread::apply_forces(float dt) {
-    for (auto &creature: m_creatures) {
-        for (auto &vertex: creature->get_vertices()) {
+    for (auto& creature : m_creatures) {
+        for (auto& vertex : creature->get_vertices()) {
             process_vertex_forces(dt, vertex->get_physics_vertex());
         }
     }
 }
 
 void PhysicsThread::apply_velocities(float dt) {
-    for (auto &creature: m_creatures) {
-        for (auto &vertex: creature->get_vertices()) {
+    for (auto& creature : m_creatures) {
+        for (auto& vertex : creature->get_vertices()) {
             vertex->get_physics_vertex()->m_position += vertex->get_physics_vertex()->m_velocity * dt;
         }
     }
@@ -51,22 +52,22 @@ void PhysicsThread::substep(float dt) {
 
     save_forces();
 
-    for (auto &creature: m_creatures) {
+    for (auto& creature : m_creatures) {
         creature->physics_tick();
 
-        for (auto &spring: creature->get_springs()) {
+        for (auto& spring : creature->get_springs()) {
             spring->get_physics_spring()->force_tick();
         }
 
-        for (auto &surface: creature->get_surfaces()) {
+        for (auto& surface : creature->get_surfaces()) {
             surface->get_physics_surface()->force_tick();
         }
 
-        for (auto &jet: creature->get_jet_objects()) {
+        for (auto& jet : creature->get_jet_objects()) {
             jet->get_physics_jet()->force_tick(dt);
         }
 
-        for (auto &vertex: creature->get_vertices()) {
+        for (auto& vertex : creature->get_vertices()) {
             vertex->get_physics_vertex()->m_force += gravity * vertex->get_physics_vertex()->m_mass;
         }
     }
@@ -86,55 +87,55 @@ void PhysicsThread::substep(float dt) {
 }
 
 void PhysicsThread::handle_terrain_collision(float dt) {
-    for (auto& creature: get_creatures()) {
-        for (auto& vertex: creature->get_vertices()) {
+    for (auto& creature : get_creatures()) {
+        for (auto& vertex : creature->get_vertices()) {
             auto* physics_vertex = vertex->get_physics_vertex();
             auto from = physics_vertex->m_position;
             auto to = from + physics_vertex->m_velocity * dt;
 
             handle_vertex_terrain_collisions(dt, physics_vertex, from, to);
 
-//            for(int i = 0;; i++) {
-//                if(!handle_vertex_terrain_collisions(dt, physics_vertex, from, to)) {
-//                    break;
-//                }
-//                to = physics_vertex->m_position;
-//                if(i >= m_max_vertex_collisions) {
-//                    physics_vertex->m_position = from;
-//                    physics_vertex->m_velocity = Vec3f(0, 0, 0);
-//                    break;
-//                }
-//            }
+            //            for(int i = 0;; i++) {
+            //                if(!handle_vertex_terrain_collisions(dt, physics_vertex, from, to)) {
+            //                    break;
+            //                }
+            //                to = physics_vertex->m_position;
+            //                if(i >= m_max_vertex_collisions) {
+            //                    physics_vertex->m_position = from;
+            //                    physics_vertex->m_velocity = Vec3f(0, 0, 0);
+            //                    break;
+            //                }
+            //            }
         }
     }
 }
 
-bool PhysicsThread::handle_vertex_terrain_collisions(float dt, PhysicsVertex *vertex, Vec3f& from, Vec3f& to) {
+bool PhysicsThread::handle_vertex_terrain_collisions(float dt, PhysicsVertex* vertex, Vec3f& from, Vec3f& to) {
     float min_collision_distance = std::numeric_limits<float>::infinity();
-    Vec3f min_collision_normal {};
+    Vec3f min_collision_normal{};
 
     Vec3f movement = to - from;
     float movement_len = movement.len();
     movement /= movement_len;
 
 #ifdef NO_BVH
-    for(auto& triangle : m_engine->get_terrain()->get_surface_mesh()) {
+    for (auto& triangle : m_engine->get_terrain()->get_surface_mesh()) {
 #else
     m_triangle_buffer.clear();
     m_engine->get_terrain()->query(from, to, m_triangle_buffer);
-    for (auto &triangle: m_triangle_buffer) {
+    for (auto& triangle : m_triangle_buffer) {
 #endif
         float collision_distance = 0.0f;
-        Vec3f collision_normal {};
+        Vec3f collision_normal{};
         if (triangle->collides(from, movement, movement_len, collision_distance, collision_normal)) {
-            if(collision_distance < min_collision_distance) {
+            if (collision_distance < min_collision_distance) {
                 min_collision_distance = collision_distance;
                 min_collision_normal = collision_normal;
             }
         }
     }
 
-    if(min_collision_distance < std::numeric_limits<float>::infinity()) {
+    if (min_collision_distance < std::numeric_limits<float>::infinity()) {
         Vec3f velocity = vertex->m_velocity;
         Vec3f force = vertex->m_force;
         float floor_friction = vertex->m_floor_friction;
@@ -177,13 +178,14 @@ bool PhysicsThread::handle_vertex_terrain_collisions(float dt, PhysicsVertex *ve
     return false;
 }
 
-void PhysicsThread::process_vertex_forces(float dt, PhysicsVertex *vertex) {
+void PhysicsThread::process_vertex_forces(float dt, PhysicsVertex* vertex) {
     float floor_level = m_engine->get_floor_level();
 
     if (vertex->m_position.y < floor_level) {
         vertex->m_position.y = floor_level;
 
-        if (vertex->m_velocity.y < 0) vertex->m_velocity.y = 0;
+        if (vertex->m_velocity.y < 0)
+            vertex->m_velocity.y = 0;
 
         if (vertex->m_force.y < 0) {
             float friction = -vertex->m_force.y * vertex->m_floor_friction;
@@ -202,7 +204,7 @@ void PhysicsThread::process_vertex_forces(float dt, PhysicsVertex *vertex) {
                 horizontal_force -= horizontal_velocity * (friction / horizontal_velocity_len);
             }
 
-            if(isnan(horizontal_force.x) || isnan(horizontal_force.y) || isnan(horizontal_velocity.x) || isnan(horizontal_velocity.y)) {
+            if (isnan(horizontal_force.x) || isnan(horizontal_force.y) || isnan(horizontal_velocity.x) || isnan(horizontal_velocity.y)) {
                 assert(false);
             }
 
@@ -223,5 +225,5 @@ void PhysicsThread::async_task() {
     int substeps = m_engine->get_substeps();
     float dt = m_engine->get_dt();
 
-    substep(dt / (float) substeps);
+    substep(dt / (float)substeps);
 }

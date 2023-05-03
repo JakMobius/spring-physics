@@ -2,8 +2,9 @@
 #include "scene-renderer.hpp"
 #include "etna/image-factory.hpp"
 
-SceneRenderer::SceneRenderer(GpuWindow& window) : m_gpu_window(window),
-                                                  m_rendering_context(window) {
+SceneRenderer::SceneRenderer(GpuWindow& window)
+    : m_gpu_window(window),
+      m_rendering_context(window) {
     m_scene_geometry_render_stage = std::make_unique<SceneGeometryRenderStage>(m_rendering_context);
     m_light_map_bake_stage = std::make_unique<LightMapBakeStage>(m_rendering_context);
     m_shadow_map_gen_stage = std::make_unique<ShadowMapGenerationStage>(m_rendering_context);
@@ -12,12 +13,12 @@ SceneRenderer::SceneRenderer(GpuWindow& window) : m_gpu_window(window),
     m_resolve_present_stage = std::make_unique<ResolvePresentStage>(m_rendering_context);
 
     m_stages = {
-         m_shadow_map_gen_stage.get(),
-         m_light_map_bake_stage.get(),
-         m_scene_geometry_render_stage.get(),
-         m_particles_stage.get(),
-         m_imgui_stage.get(),
-         m_resolve_present_stage.get(),
+        m_shadow_map_gen_stage.get(),
+        m_light_map_bake_stage.get(),
+        m_scene_geometry_render_stage.get(),
+        m_particles_stage.get(),
+        m_imgui_stage.get(),
+        m_resolve_present_stage.get(),
     };
 }
 
@@ -92,9 +93,9 @@ void SceneRenderer::draw_frame() {
     uint32_t present_swapchain_images[] = {m_rendering_context.m_swapchain_image_index};
 
     m_rendering_context.m_render_command_buffer.submit(
-            m_gpu_window.get_device_graphics_queue(),
-            m_rendering_context.m_flight_fence,
-            signal_semaphores, wait_semaphores, wait_stages);
+        m_gpu_window.get_device_graphics_queue(),
+        m_rendering_context.m_flight_fence,
+        signal_semaphores, wait_semaphores, wait_stages);
 
     VK::QueuePresentInfo queue_present_info{};
     queue_present_info.set_wait_semaphores(signal_semaphores);

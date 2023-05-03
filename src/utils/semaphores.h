@@ -15,7 +15,7 @@
 class Semaphore {
     dispatch_semaphore_t sem;
 
-public:
+  public:
     inline Semaphore(uint32_t value = 0) {
         sem = dispatch_semaphore_create(value);
     }
@@ -35,32 +35,26 @@ public:
 
 #else // todo: ELIF LINUX
 
-class Semaphore
-{
+class Semaphore {
     sem_t sem;
 
     Semaphore(const Semaphore& other) = delete;
     Semaphore& operator=(const Semaphore& other) = delete;
 
-public:
-    inline Semaphore(uint32_t value = 0)
-    {
+  public:
+    inline Semaphore(uint32_t value = 0) {
         sem_init(&sem, 0, value);
     }
 
-    ~Semaphore()
-    {
+    ~Semaphore() {
         sem_destroy(&sem);
     }
 
-    inline void wait()
-    {
+    inline void wait() {
         int rc = -1;
-        do
-        {
+        do {
             rc = sem_wait(&sem);
-        }
-        while (rc == -1 && errno == EINTR);
+        } while (rc == -1 && errno == EINTR);
     }
 
     inline void post() {

@@ -5,24 +5,24 @@
 #include "user-controller.hpp"
 #include "game-scene.hpp"
 
-UserController::UserController(GameScene *scene) : m_scene(scene) {
-
+UserController::UserController(GameScene* scene)
+    : m_scene(scene) {
 }
 
 void UserController::on_key_press(Window* window, int key, int scancode, int mods) {
-    if(key == GLFW_KEY_ESCAPE) {
+    if (key == GLFW_KEY_ESCAPE) {
         window->capture_mouse(false);
     }
 
-    if(key == GLFW_KEY_C) {
+    if (key == GLFW_KEY_C) {
         m_scene->toggle_free_camera();
     }
 
-    if(key == GLFW_KEY_R) {
+    if (key == GLFW_KEY_R) {
         m_scene->spawn();
     }
 
-    if(m_scene->get_camera_controller())
+    if (m_scene->get_camera_controller())
         m_scene->get_camera_controller()->on_key_press(key, scancode, mods);
 }
 

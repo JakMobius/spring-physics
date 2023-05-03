@@ -2,27 +2,28 @@
 
 class ConcurrentPhysicsEngine;
 
-#include <unordered_set>
-#include "vertex.hpp"
-#include "spring.hpp"
-#include "../../../utils/semaphores.h"
 #include "../../../utils/async-task.hpp"
+#include "../../../utils/semaphores.h"
 #include "../creatures/creature.hpp"
+#include "spring.hpp"
 #include "terrain-polygon.hpp"
+#include "vertex.hpp"
+#include <unordered_set>
 
 class PhysicsThread : public AsyncTask {
 
-    std::unordered_set<Creature*> m_creatures {};
+    std::unordered_set<Creature*> m_creatures{};
     ConcurrentPhysicsEngine* m_engine = nullptr;
-    std::vector<TerrainPolygon *> m_triangle_buffer {};
+    std::vector<TerrainPolygon*> m_triangle_buffer{};
 
     int m_max_vertex_collisions = 4;
 
     int m_phase = 0;
 
-public:
-
-    std::unordered_set<Creature*>& get_creatures() { return m_creatures; }
+  public:
+    std::unordered_set<Creature*>& get_creatures() {
+        return m_creatures;
+    }
 
     explicit PhysicsThread(ConcurrentPhysicsEngine* engine);
 
@@ -40,7 +41,7 @@ public:
 
     void handle_terrain_collision(float dt);
 
-    bool handle_vertex_terrain_collisions(float dt, PhysicsVertex *vertex, Vec3f& from, Vec3f& to);
+    bool handle_vertex_terrain_collisions(float dt, PhysicsVertex* vertex, Vec3f& from, Vec3f& to);
 };
 
 #include "physics-engine.hpp"

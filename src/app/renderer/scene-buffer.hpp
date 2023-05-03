@@ -15,7 +15,7 @@ class SceneStorageBuffer {
     std::unique_ptr<SmartBuffer> m_buffer;
     std::vector<float> m_storage{};
 
-    BufferRange m_dirty_range {};
+    BufferRange m_dirty_range{};
     int m_gpu_buffer_size = -1;
     VkDeviceSize m_offset_alignment = 0;
     VkDeviceSize m_size_alignment = 0;
@@ -24,8 +24,9 @@ class SceneStorageBuffer {
     int m_descriptor_set_index = -1;
     int m_binding = -1;
 
-public:
-    SceneStorageBuffer(VK::Device* device, SmartBufferFactory factory): m_device(device), m_factory(std::move(factory)) {
+  public:
+    SceneStorageBuffer(VK::Device* device, SmartBufferFactory factory)
+        : m_device(device), m_factory(std::move(factory)) {
         VkPhysicalDeviceProperties physicalDeviceProperties{};
         vkGetPhysicalDeviceProperties(m_device->get_physical_device()->get_handle(), &physicalDeviceProperties);
 
@@ -34,9 +35,9 @@ public:
     };
 
     void ensure_size() {
-        if(!m_buffer || m_gpu_buffer_size != m_storage.size()) {
+        if (!m_buffer || m_gpu_buffer_size != m_storage.size()) {
             m_gpu_buffer_size = m_storage.size();
-            if(m_gpu_buffer_size == 0) {
+            if (m_gpu_buffer_size == 0) {
                 m_dirty_range.clear();
                 return;
             }
@@ -50,7 +51,7 @@ public:
     }
 
     void rebind() {
-        if(m_descriptor_set_array && m_buffer) {
+        if (m_descriptor_set_array && m_buffer) {
             VK::StorageBufferDescriptor storage_buffer_descriptor(m_buffer->get_buffer(), 0, m_gpu_buffer_size * sizeof(float));
             m_descriptor_set_array->bind_descriptor(m_descriptor_set_index, m_binding, storage_buffer_descriptor);
         }
@@ -61,7 +62,7 @@ public:
     }
 
     void update(VK::CommandBuffer& command_buffer) {
-        if(m_dirty_range.is_empty()) {
+        if (m_dirty_range.is_empty()) {
             return;
         }
 

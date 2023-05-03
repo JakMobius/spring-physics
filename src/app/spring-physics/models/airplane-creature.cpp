@@ -1,27 +1,26 @@
 
 #include "airplane-creature.hpp"
-#include <vector>
 #include "../creatures/creature.hpp"
 #include "builder/model-builder.hpp"
 #include "builder/wheel.hpp"
+#include <vector>
 
-AirplaneCreature::AirplaneCreature(World *world, const Matrix4f &transform) : m_world(world) {
+AirplaneCreature::AirplaneCreature(World* world, const Matrix4f& transform)
+    : m_world(world) {
     ModelBuilder::Builder builder;
 
-    builder.get_state().set_matrix(Matrix4f::scale_matrix(0.3f, 0.3f, 0.3f)
-                                   * Matrix4f::translation_matrix(0.0f, 1.1f, 0.0f)
-                                   * transform);
+    builder.get_state().set_matrix(Matrix4f::scale_matrix(0.3f, 0.3f, 0.3f) * Matrix4f::translation_matrix(0.0f, 1.1f, 0.0f) * transform);
 
     // Build a cube with 8 vertices and 12 edges
 
     builder.vertex((6.3 + -1.0), 0.0f, -2.0f); // front, bottom, left 0
     builder.vertex((8.0 + 1.0), -1.5f, -2.0f); // back, bottom, left 1
     builder.vertex((2.0 + -1.0), 2.0f, -1.0f); // front, top, left 2
-    builder.vertex((7.0 + 1.0), 2.0f, -1.0f); // back, top, left 3
-    builder.vertex((6.3 + -1.0), 0.0f, 2.0f); // front, bottom, right 4
-    builder.vertex((8.0 + 1.0), -1.5f, 2.0f); // back, bottom, right 5
-    builder.vertex((2.0 + -1.0), 2.0f, 1.0f); // front, top, right 6
-    builder.vertex((7.0 + 1.0), 2.0f, 1.0f); // back, top, right 7
+    builder.vertex((7.0 + 1.0), 2.0f, -1.0f);  // back, top, left 3
+    builder.vertex((6.3 + -1.0), 0.0f, 2.0f);  // front, bottom, right 4
+    builder.vertex((8.0 + 1.0), -1.5f, 2.0f);  // back, bottom, right 5
+    builder.vertex((2.0 + -1.0), 2.0f, 1.0f);  // front, top, right 6
+    builder.vertex((7.0 + 1.0), 2.0f, 1.0f);   // back, top, right 7
 
     builder.springs_between_range(0, 8);
 
@@ -30,7 +29,7 @@ AirplaneCreature::AirplaneCreature(World *world, const Matrix4f &transform) : m_
     // Add wings to the cube
 
     builder.vertex(11.0f, 2.0f, -10.0f); // 8
-    builder.vertex(11.0f, 2.0f, 10.0f); // 9
+    builder.vertex(11.0f, 2.0f, 10.0f);  // 9
 
     // Connect wings to the cube
 
@@ -51,7 +50,7 @@ AirplaneCreature::AirplaneCreature(World *world, const Matrix4f &transform) : m_
     // Connect them to the nearest cube vertices and wingtips
 
     builder.vertex(11.0f, 2.0f, -3.0f); // 11
-    builder.vertex(11.0f, 2.0f, 3.0f); // 12
+    builder.vertex(11.0f, 2.0f, 3.0f);  // 12
 
     builder.spring(1, 11);
     builder.spring(5, 11);
@@ -83,9 +82,9 @@ AirplaneCreature::AirplaneCreature(World *world, const Matrix4f &transform) : m_
     // Add four more anchors below the tail anchors to form a prolonged triangle, connect them all to each other
 
     builder.vertex(23.0f, 0.0f, -2.0f); // 14
-    builder.vertex(23.0f, 0.0f, 2.0f); // 15
+    builder.vertex(23.0f, 0.0f, 2.0f);  // 15
     builder.vertex(15.0f, 0.0f, -2.0f); // 16
-    builder.vertex(15.0f, 0.0f, 2.0f); // 17
+    builder.vertex(15.0f, 0.0f, 2.0f);  // 17
 
     builder.spring(10, 14);
     builder.spring(10, 15);
@@ -134,7 +133,7 @@ AirplaneCreature::AirplaneCreature(World *world, const Matrix4f &transform) : m_
     // Add horizontal stabilizers
 
     builder.vertex(23.0f, 2.0f, -6.0f); // 19
-    builder.vertex(23.0f, 2.0f, 6.0f); // 20
+    builder.vertex(23.0f, 2.0f, 6.0f);  // 20
 
     // Connect horizontal stabilizers to the tail anchors
 
@@ -150,7 +149,7 @@ AirplaneCreature::AirplaneCreature(World *world, const Matrix4f &transform) : m_
     // Add ailerons. They should be connected to wingtips and anchors behind the cube
 
     builder.vertex(14.0f, 2.0f, -5.0f); // 21
-    builder.vertex(14.0f, 2.0f, 5.0f); // 22
+    builder.vertex(14.0f, 2.0f, 5.0f);  // 22
 
     builder.spring(8, 21);
     builder.spring(9, 22);
@@ -160,7 +159,7 @@ AirplaneCreature::AirplaneCreature(World *world, const Matrix4f &transform) : m_
     // Aileron support. Located just under the aileron nodes
 
     builder.vertex(11.0f, 0.0f, -2.0f); // 23
-    builder.vertex(11.0f, 0.0f, 2.0f); // 24
+    builder.vertex(11.0f, 0.0f, 2.0f);  // 24
 
     builder.spring(21, 23);
     builder.spring(8, 23);
@@ -177,7 +176,7 @@ AirplaneCreature::AirplaneCreature(World *world, const Matrix4f &transform) : m_
     // Add elevators
 
     builder.vertex(26.0f, 2.0f, -3.0f); // 25
-    builder.vertex(26.0f, 2.0f, 3.0f); // 26
+    builder.vertex(26.0f, 2.0f, 3.0f);  // 26
 
     builder.spring(10, 25);
     builder.spring(10, 26);
@@ -185,7 +184,7 @@ AirplaneCreature::AirplaneCreature(World *world, const Matrix4f &transform) : m_
     // Elevator support. Located just under the elevator nodes
 
     builder.vertex(26.0f, 0.0f, -2.0f); // 27
-    builder.vertex(26.0f, 0.0f, 2.0f); // 28
+    builder.vertex(26.0f, 0.0f, 2.0f);  // 28
 
     builder.spring(25, 27);
     builder.spring(26, 28);
@@ -275,21 +274,21 @@ AirplaneCreature::AirplaneCreature(World *world, const Matrix4f &transform) : m_
 }
 
 void AirplaneCreature::set_throttle(float throttle) {
-    for (auto &jet: m_creature->get_jet_objects()) {
+    for (auto& jet : m_creature->get_jet_objects()) {
         jet->get_physics_jet()->m_force = jet->get_max_force() * throttle;
     }
 }
 
 void AirplaneCreature::set_controls(Vec3f controls) {
-// Update muscle inputs
+    // Update muscle inputs
     m_creature->get_springs()[m_left_aileron_spring]->get_physics_spring()->m_target_length =
-            m_left_aileron_muscle_length * (1.0 + controls.x * 0.1);
+        m_left_aileron_muscle_length * (1.0 + controls.x * 0.1);
     m_creature->get_springs()[m_right_aileron_spring]->get_physics_spring()->m_target_length =
-            m_right_aileron_muscle_length * (1.0 - controls.x * 0.1);
+        m_right_aileron_muscle_length * (1.0 - controls.x * 0.1);
 
     m_creature->get_springs()[m_left_elevator_spring]->get_physics_spring()->m_target_length =
-            m_left_elevator_muscle_length * (1.0 + controls.y * 0.3);
+        m_left_elevator_muscle_length * (1.0 + controls.y * 0.3);
 
     m_creature->get_springs()[m_right_elevator_spring]->get_physics_spring()->m_target_length =
-            m_right_elevator_muscle_length * (1.0 + controls.y * 0.3);
+        m_right_elevator_muscle_length * (1.0 + controls.y * 0.3);
 }

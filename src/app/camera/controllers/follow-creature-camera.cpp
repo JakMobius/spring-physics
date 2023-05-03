@@ -11,11 +11,11 @@ void FollowCreatureCamera::on_tick(float delta_time) {
 
     float camera_angle = old_camera_heading;
 
-    if(delta.len() > 0.1) {
+    if (delta.len() > 0.1) {
         float creature_heading = 0;
         creature_heading = -atan2(delta.x, delta.z);
         float desired_camera_angle = creature_heading + M_PI / 2;
-        if(old_speed_low) {
+        if (old_speed_low) {
             m_view_angle += old_camera_heading - desired_camera_angle;
         }
         camera_angle = desired_camera_angle;
@@ -46,25 +46,30 @@ void FollowCreatureCamera::on_tick(float delta_time) {
 
 Vec3f FollowCreatureCamera::get_movement() {
     Vec3f result = Vec3f(0.0f, 0.0f, 0.0f);
-    if (m_window->is_key_pressed(GLFW_KEY_W)) result.z = -1.0f;
-    if (m_window->is_key_pressed(GLFW_KEY_S)) result.z = 1.0f;
-    if (m_window->is_key_pressed(GLFW_KEY_A)) result.x = -1.0f;
-    if (m_window->is_key_pressed(GLFW_KEY_D)) result.x = 1.0f;
-    if (m_window->is_key_pressed(GLFW_KEY_SPACE)) result.y = 1.0f;
-    if (m_window->is_key_pressed(GLFW_KEY_LEFT_SHIFT)) result.y = -1.0f;
+    if (m_window->is_key_pressed(GLFW_KEY_W))
+        result.z = -1.0f;
+    if (m_window->is_key_pressed(GLFW_KEY_S))
+        result.z = 1.0f;
+    if (m_window->is_key_pressed(GLFW_KEY_A))
+        result.x = -1.0f;
+    if (m_window->is_key_pressed(GLFW_KEY_D))
+        result.x = 1.0f;
+    if (m_window->is_key_pressed(GLFW_KEY_SPACE))
+        result.y = 1.0f;
+    if (m_window->is_key_pressed(GLFW_KEY_LEFT_SHIFT))
+        result.y = -1.0f;
 
-
-    if(glfwJoystickPresent(GLFW_JOYSTICK_1)) {
+    if (glfwJoystickPresent(GLFW_JOYSTICK_1)) {
         int count = 0;
         const float* axes = glfwGetJoystickAxes(GLFW_JOYSTICK_1, &count);
 
-        if(count >= 6) {
-             Vec3f joystick_controls = Vec3f(axes[2], -axes[5], 0.0f);
-             float len = joystick_controls.len();
-             if(len > 0.05f) {
-               joystick_controls -= joystick_controls * 0.05f / len;
-               result += joystick_controls;
-             }
+        if (count >= 6) {
+            Vec3f joystick_controls = Vec3f(axes[2], -axes[5], 0.0f);
+            float len = joystick_controls.len();
+            if (len > 0.05f) {
+                joystick_controls -= joystick_controls * 0.05f / len;
+                result += joystick_controls;
+            }
         }
     }
     return result;

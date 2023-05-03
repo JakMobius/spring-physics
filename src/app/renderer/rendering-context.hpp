@@ -11,9 +11,10 @@
 #include <etna/command-queue/command-queue-pool.hpp>
 
 class RenderingContext {
-public:
-    RenderingContext(GpuWindow& window) : m_gpu_window(window) {
-        for(int i = 0; i < 3; i++) {
+  public:
+    RenderingContext(GpuWindow& window)
+        : m_gpu_window(window) {
+        for (int i = 0; i < 3; i++) {
             m_clear_color.set(i, pow(m_clear_color[i], 1.0f / 2.2f));
         }
     }
@@ -56,8 +57,8 @@ public:
 
     std::unique_ptr<SceneStorageBuffer> m_particle_vertex_buffer{};
 
-    std::unique_ptr<Etna::Image> m_color_image {};
-    std::unique_ptr<Etna::Image> m_depth_image {};
+    std::unique_ptr<Etna::Image> m_color_image{};
+    std::unique_ptr<Etna::Image> m_depth_image{};
 
     VK::CommandBuffer m_render_command_buffer{};
 

@@ -23,15 +23,16 @@ struct LightMapBakePushConstants {
 };
 
 class LightMapBakeStage : public Stage {
-public:
-    explicit LightMapBakeStage(RenderingContext& ctx) : m_ctx(ctx) {}
+  public:
+    explicit LightMapBakeStage(RenderingContext& ctx)
+        : m_ctx(ctx) {}
 
     void initialize() override;
     void handle_swapchain_update() override;
     void record_command_buffer(VK::CommandBuffer& command_buffer) override;
     void prepare_for_frame() override;
 
-private:
+  private:
     void create_depth_image();
     void create_render_pass();
     void create_graphics_pipeline();

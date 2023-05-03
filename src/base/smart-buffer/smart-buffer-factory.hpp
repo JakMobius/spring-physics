@@ -1,14 +1,14 @@
 #pragma once
 
-#include <etna/vk-wrappers/device.hpp>
-#include <etna/vk-wrappers/buffer/vk-buffer-factory.hpp>
 #include "smart-buffer.hpp"
+#include <etna/vk-wrappers/buffer/vk-buffer-factory.hpp>
+#include <etna/vk-wrappers/device.hpp>
 
 class SmartBufferFactory {
-    VK::BufferFactory m_factory {};
+    VK::BufferFactory m_factory{};
     SmartBufferType m_type = SmartBufferType::with_staging_buffer;
 
-public:
+  public:
     SmartBufferFactory& set_mode(SmartBufferType type) {
         m_type = type;
         return *this;
@@ -34,30 +34,30 @@ public:
     }
 
     SmartBuffer create(VK::Device* device) {
-        switch(m_type) {
-            case with_staging_buffer:
-            case with_temporary_staging_buffer:
-                m_factory.set_memory_properties(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-                break;
-            case without_staging_buffer:
-                m_factory.set_memory_properties(VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
-                break;
+        switch (m_type) {
+        case with_staging_buffer:
+        case with_temporary_staging_buffer:
+            m_factory.set_memory_properties(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+            break;
+        case without_staging_buffer:
+            m_factory.set_memory_properties(VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
+            break;
         }
 
         auto result = SmartBuffer(m_factory.create_memory_buffer(device));
-        switch(m_type) {
-            case with_staging_buffer:
-                result.set_use_own_staging_buffer(true);
-                result.set_own_keep_staging_buffer_alive(true);
-                break;
-            case with_temporary_staging_buffer:
-                result.set_use_own_staging_buffer(false);
-                result.set_own_keep_staging_buffer_alive(false);
-                break;
-            case without_staging_buffer:
-                result.set_use_own_staging_buffer(false);
-                result.set_own_keep_staging_buffer_alive(false);
-                break;
+        switch (m_type) {
+        case with_staging_buffer:
+            result.set_use_own_staging_buffer(true);
+            result.set_own_keep_staging_buffer_alive(true);
+            break;
+        case with_temporary_staging_buffer:
+            result.set_use_own_staging_buffer(false);
+            result.set_own_keep_staging_buffer_alive(false);
+            break;
+        case without_staging_buffer:
+            result.set_use_own_staging_buffer(false);
+            result.set_own_keep_staging_buffer_alive(false);
+            break;
         }
         return result;
     }

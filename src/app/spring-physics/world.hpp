@@ -10,17 +10,17 @@
 #include <vector>
 
 class World {
-    std::unique_ptr<ConcurrentPhysicsEngine> m_physics_engine {};
+    std::unique_ptr<ConcurrentPhysicsEngine> m_physics_engine{};
     RenderingContext* m_ctx;
-    std::unique_ptr<ParticleHost> m_particle_host {};
-    std::unordered_set<WorldObject*> m_objects {};
+    std::unique_ptr<ParticleHost> m_particle_host{};
+    std::unordered_set<WorldObject*> m_objects{};
 
-    std::vector<std::unique_ptr<SurfaceTriangleObject>> m_surface_mesh {};
+    std::vector<std::unique_ptr<SurfaceTriangleObject>> m_surface_mesh{};
 
     std::unique_ptr<GeometryObject> m_floor = nullptr;
     std::unique_ptr<Material> m_floor_material = nullptr;
 
-public:
+  public:
     void add_floor();
 
     World(RenderingContext* drawer);
@@ -29,14 +29,26 @@ public:
 
     std::vector<std::unique_ptr<SurfaceTriangleObject>>& get_surface_mesh();
 
-    RenderingContext* get_rendering_context() { return m_ctx; }
-    ConcurrentPhysicsEngine* get_physics_engine() { return m_physics_engine.get(); }
-    ParticleHost* get_particle_host() { return m_particle_host.get(); }
+    RenderingContext* get_rendering_context() {
+        return m_ctx;
+    }
+    ConcurrentPhysicsEngine* get_physics_engine() {
+        return m_physics_engine.get();
+    }
+    ParticleHost* get_particle_host() {
+        return m_particle_host.get();
+    }
 
-    void set_drawer(RenderingContext* drawer) { m_ctx = drawer; }
+    void set_drawer(RenderingContext* drawer) {
+        m_ctx = drawer;
+    }
 
     void tick(float dt);
 
-    void add_object(WorldObject* object) { m_objects.insert(object); }
-    void remove_object(WorldObject* object) { m_objects.erase(object); }
+    void add_object(WorldObject* object) {
+        m_objects.insert(object);
+    }
+    void remove_object(WorldObject* object) {
+        m_objects.erase(object);
+    }
 };

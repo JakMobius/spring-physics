@@ -7,7 +7,7 @@
 #include "particle-host.hpp"
 
 void World::tick(float dt) {
-    for(auto& object : m_objects) {
+    for (auto& object : m_objects) {
         object->tick(dt);
     }
     m_particle_host->upload_particles(*m_ctx);
@@ -26,7 +26,8 @@ void World::add_floor() {
     generator.reset();
 }
 
-World::World(RenderingContext* drawer) : m_ctx(drawer) {
+World::World(RenderingContext* drawer)
+    : m_ctx(drawer) {
     m_physics_engine = std::make_unique<ConcurrentPhysicsEngine>();
     m_particle_host = std::make_unique<ParticleHost>();
 
@@ -37,6 +38,6 @@ World::~World() {
     m_ctx->m_geometry_pool.get()->destroy_material(m_floor_material.get());
 }
 
-std::vector<std::unique_ptr<SurfaceTriangleObject>> &World::get_surface_mesh() {
+std::vector<std::unique_ptr<SurfaceTriangleObject>>& World::get_surface_mesh() {
     return m_surface_mesh;
 }

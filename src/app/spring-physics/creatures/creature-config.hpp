@@ -1,11 +1,11 @@
 #pragma once
 
-#include <vector>
-#include <random>
 #include "../../../utils/vec3.hpp"
-#include "../objects/vertex-object.hpp"
-#include "../objects/spring-object.hpp"
 #include "../objects/muscle.hpp"
+#include "../objects/spring-object.hpp"
+#include "../objects/vertex-object.hpp"
+#include <random>
+#include <vector>
 
 struct VertexConfig {
     float m_mass;

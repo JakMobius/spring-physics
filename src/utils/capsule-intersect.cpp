@@ -13,10 +13,10 @@ Vec3f capsule_project(Vec3f point, Vec3f cap_a, Vec3f cap_b, float cap_radius) {
     Vec3f pa = point - cap_a;
     float h = pa.dot(ba) / ba.dot(ba);
 
-    if(h < 0) {
+    if (h < 0) {
         return cap_a + (point - cap_a).normalize() * cap_radius;
     }
-    if(h > 1) {
+    if (h > 1) {
         return cap_b + (point - cap_b).normalize() * cap_radius;
     }
 

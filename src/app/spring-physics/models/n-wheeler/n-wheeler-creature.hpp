@@ -2,9 +2,9 @@
 
 #include "../../controllable-creature.hpp"
 
-class NWheelerCreature: public ControllableCreature {
+class NWheelerCreature : public ControllableCreature {
 
-public:
+  public:
     NWheelerCreature(World* world, const Matrix4f& transform);
     ~NWheelerCreature() override = default;
 

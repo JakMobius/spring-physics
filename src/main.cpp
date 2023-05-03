@@ -1,11 +1,11 @@
 
 
-#include <iostream>
-#include <etna/init.hpp>
 #include "app/app.hpp"
+#include <etna/init.hpp>
+#include <iostream>
 
 int main() {
-    if(!Etna::initialize()) {
+    if (!Etna::initialize()) {
         std::cerr << "Could not find Vulkan library\n";
         return EXIT_FAILURE;
     }

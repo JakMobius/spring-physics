@@ -9,20 +9,20 @@ void ShadowMapGenerationStage::create_depth_image() {
     VkExtent3D extent3D{extent.width, extent.height, 1};
 
     auto depth_image_factory = VK::ImageFactory()
-                                       .set_array_layers(m_layers)
-                                       .set_image_type(VK_IMAGE_TYPE_2D)
-                                       .set_samples(VK_SAMPLE_COUNT_1_BIT)
-                                       .set_extent(extent3D)
-                                       .set_usage(VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT)
-                                       .set_format(depth_format);
+                                   .set_array_layers(m_layers)
+                                   .set_image_type(VK_IMAGE_TYPE_2D)
+                                   .set_samples(VK_SAMPLE_COUNT_1_BIT)
+                                   .set_extent(extent3D)
+                                   .set_usage(VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT)
+                                   .set_format(depth_format);
     m_depth_image = depth_image_factory.create(&window.get_device());
 
     auto depth_image_view_factory = VK::ImageViewFactory()
-                                            .set_format(depth_format)
-                                            .set_view_type(VK_IMAGE_VIEW_TYPE_2D);
+                                        .set_format(depth_format)
+                                        .set_view_type(VK_IMAGE_VIEW_TYPE_2D);
 
     depth_image_view_factory.get_subresource_range()
-            .set_aspect_mask(VK_IMAGE_ASPECT_DEPTH_BIT);
+        .set_aspect_mask(VK_IMAGE_ASPECT_DEPTH_BIT);
 
     for (uint32_t i = 0; i < m_layers; i++) {
         depth_image_view_factory.get_subresource_range().set_base_array_layer(i);
@@ -33,8 +33,8 @@ void ShadowMapGenerationStage::create_depth_image() {
     depth_image_view_factory.set_view_type(VK_IMAGE_VIEW_TYPE_2D_ARRAY);
 
     depth_image_view_factory.get_subresource_range()
-            .set_base_array_layer(0)
-            .set_array_layers(m_layers);
+        .set_base_array_layer(0)
+        .set_array_layers(m_layers);
 
     m_image_view = depth_image_view_factory.create(&window.get_device(), m_depth_image.get_image());
 
@@ -112,8 +112,8 @@ void ShadowMapGenerationStage::create_graphics_pipeline() {
     push_constant.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
 
     VkDescriptorSetLayout descriptors[]{
-            m_ctx.m_transforms_descriptor_set_layout.get_handle(),
-            m_ctx.m_materials_descriptor_set_layout.get_handle(),
+        m_ctx.m_transforms_descriptor_set_layout.get_handle(),
+        m_ctx.m_materials_descriptor_set_layout.get_handle(),
     };
     VkPushConstantRange push_constants[]{push_constant};
 
@@ -128,8 +128,8 @@ void ShadowMapGenerationStage::record_command_buffer(VK::CommandBuffer& command_
     auto vertex_buffer = m_ctx.m_vertex_buffer.get();
 
     VkDescriptorSet descriptors[]{
-            m_ctx.m_scene_descriptor_set_array->get_descriptor_sets()[0],// transforms
-            m_ctx.m_scene_descriptor_set_array->get_descriptor_sets()[1] // materials
+        m_ctx.m_scene_descriptor_set_array->get_descriptor_sets()[0], // transforms
+        m_ctx.m_scene_descriptor_set_array->get_descriptor_sets()[1]  // materials
     };
     VkBuffer vertex_buffers[] = {vertex_buffer->get_buffer()->get_buffer().get_handle()};
     VkDeviceSize offsets[] = {0};
@@ -151,8 +151,8 @@ void ShadowMapGenerationStage::record_command_buffer(VK::CommandBuffer& command_
         auto& sizes = m_ctx.m_geometry_pool->get_size_array();
         auto& indices = m_ctx.m_geometry_pool->get_start_indices();
 
-        for(int i = 0; i < sizes.size(); i++) {
-          command_buffer.draw(sizes[i], 1, indices[i], 0);
+        for (int i = 0; i < sizes.size(); i++) {
+            command_buffer.draw(sizes[i], 1, indices[i], 0);
         }
 
         command_buffer.end_render_pass();

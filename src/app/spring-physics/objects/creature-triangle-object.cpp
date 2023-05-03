@@ -3,14 +3,15 @@
 //
 
 #include "creature-triangle-object.hpp"
-#include "../world.hpp"
 #include "../../../world/shape-generator.hpp"
+#include "../world.hpp"
 
-CreatureTriangleObject::CreatureTriangleObject(World *world, PhysicsVertex *vertex_a, PhysicsVertex *vertex_b,
-                                     PhysicsVertex *vertex_c) : WorldObject(world) {
+CreatureTriangleObject::CreatureTriangleObject(World* world, PhysicsVertex* vertex_a, PhysicsVertex* vertex_b,
+                                               PhysicsVertex* vertex_c)
+    : WorldObject(world) {
     m_physics_triangle = std::make_unique<PhysicsSurface>(vertex_a,
-                                                         vertex_b,
-                                                         vertex_c);
+                                                          vertex_b,
+                                                          vertex_c);
     m_world->add_object(this);
 }
 
@@ -18,10 +19,11 @@ CreatureTriangleObject::~CreatureTriangleObject() {
     m_world->remove_object(this);
 }
 
-void CreatureTriangleObject::create_colored_mesh(const Vec3f &color) {
+void CreatureTriangleObject::create_colored_mesh(const Vec3f& color) {
     auto geometry_pool = m_world->get_rendering_context()->m_geometry_pool.get();
 
-    if (!m_material) m_material = geometry_pool->create_material();
+    if (!m_material)
+        m_material = geometry_pool->create_material();
     m_material->set_color(color);
 
     ShapeGenerator generator;
@@ -35,7 +37,8 @@ void CreatureTriangleObject::create_colored_mesh(const Vec3f &color) {
 }
 
 void CreatureTriangleObject::tick(float dt) {
-    if (!m_geometry_object) return;
+    if (!m_geometry_object)
+        return;
 
     // The triangle points are:
     // {0, 0, 0}, {0, 1, 0}, {0, 0, 1}
@@ -52,12 +55,23 @@ void CreatureTriangleObject::tick(float dt) {
     Vec3f basis_a = basis_b.cross(basis_c);
 
     Matrix4f transform({
-                               basis_a.x, basis_a.y, basis_a.z, 0,
-                               basis_b.x, basis_b.y, basis_b.z, 0,
-                               basis_c.x, basis_c.y, basis_c.z, 0,
-                               origin.x, origin.y, origin.z, 1,
-                       });
-
+        basis_a.x,
+        basis_a.y,
+        basis_a.z,
+        0,
+        basis_b.x,
+        basis_b.y,
+        basis_b.z,
+        0,
+        basis_c.x,
+        basis_c.y,
+        basis_c.z,
+        0,
+        origin.x,
+        origin.y,
+        origin.z,
+        1,
+    });
 
     m_geometry_object->set_transform(transform);
 }

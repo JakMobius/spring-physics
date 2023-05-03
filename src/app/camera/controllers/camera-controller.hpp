@@ -5,12 +5,13 @@
 
 class CameraController {
 
-protected:
+  protected:
     Window* m_window;
     Camera* m_controlled_camera;
 
-public:
-    CameraController(Window* window) : m_window(window) {}
+  public:
+    CameraController(Window* window)
+        : m_window(window) {}
 
     void set_controlled_camera(Camera* camera) {
         m_controlled_camera = camera;

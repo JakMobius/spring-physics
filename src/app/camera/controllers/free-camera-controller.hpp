@@ -6,8 +6,9 @@
 #include "camera-controller.hpp"
 
 class FreeCameraController : public CameraController {
-public:
-    explicit FreeCameraController(Window *window) : CameraController(window) {};
+  public:
+    explicit FreeCameraController(Window* window)
+        : CameraController(window){};
 
     void on_tick(float delta_time) override;
 
@@ -18,7 +19,7 @@ public:
 
     void on_captured_mouse_move(double dx, double dy) override;
 
-private:
+  private:
     float m_speed = 0.1;
     float m_rotation_speed = 0.1;
     float m_mouse_sensitive = 0.001f;

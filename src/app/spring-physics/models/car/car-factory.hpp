@@ -20,8 +20,9 @@ class CarFactory {
         int steering_node;
     };
 
-public:
-    CarFactory(ModelBuilder::Builder &builder) : m_builder(builder) {};
+  public:
+    CarFactory(ModelBuilder::Builder& builder)
+        : m_builder(builder){};
 
     ~CarFactory() = default;
 
@@ -153,28 +154,28 @@ public:
                                   back_right_suspension.body_connections.up_back);
 
         m_builder.springs_between(
-                front_left_suspension.body_connections.up_back,
-                front_left_suspension.body_connections.bottom_back,
-                back_left_suspension.body_connections.up_front,
-                back_left_suspension.body_connections.bottom_front);
+            front_left_suspension.body_connections.up_back,
+            front_left_suspension.body_connections.bottom_back,
+            back_left_suspension.body_connections.up_front,
+            back_left_suspension.body_connections.bottom_front);
 
         m_builder.springs_between(
-                front_right_suspension.body_connections.up_back,
-                front_right_suspension.body_connections.bottom_back,
-                back_right_suspension.body_connections.up_front,
-                back_right_suspension.body_connections.bottom_front);
+            front_right_suspension.body_connections.up_back,
+            front_right_suspension.body_connections.bottom_back,
+            back_right_suspension.body_connections.up_front,
+            back_right_suspension.body_connections.bottom_front);
 
         m_builder.springs_between(
-                front_left_suspension.body_connections.up_back,
-                front_left_suspension.body_connections.bottom_back,
-                back_right_suspension.body_connections.up_front,
-                back_right_suspension.body_connections.bottom_front);
+            front_left_suspension.body_connections.up_back,
+            front_left_suspension.body_connections.bottom_back,
+            back_right_suspension.body_connections.up_front,
+            back_right_suspension.body_connections.bottom_front);
 
         m_builder.springs_between(
-                front_right_suspension.body_connections.up_back,
-                front_right_suspension.body_connections.bottom_back,
-                back_left_suspension.body_connections.up_front,
-                back_left_suspension.body_connections.bottom_front);
+            front_right_suspension.body_connections.up_back,
+            front_right_suspension.body_connections.bottom_back,
+            back_left_suspension.body_connections.up_front,
+            back_left_suspension.body_connections.bottom_front);
 
         m_front_steering_spring = m_builder.spring(front_left_suspension.body_connections.bottom_front, front_right_suspension.steering_node);
         m_back_steering_spring = m_builder.spring(back_left_suspension.body_connections.bottom_front, back_right_suspension.steering_node);
@@ -191,5 +192,5 @@ public:
     int m_front_steering_spring = -1;
     int m_back_steering_spring = -1;
 
-    ModelBuilder::Builder &m_builder;
+    ModelBuilder::Builder& m_builder;
 };

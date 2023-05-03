@@ -3,7 +3,8 @@
 #include "../builder/model-builder.hpp"
 #include "../builder/wheel.hpp"
 
-NWheelerCreature::NWheelerCreature(World *world, const Matrix4f& transform): m_world(world) {
+NWheelerCreature::NWheelerCreature(World* world, const Matrix4f& transform)
+    : m_world(world) {
     ModelBuilder::Builder builder;
 
     builder.get_state().set_matrix(transform);
@@ -13,7 +14,7 @@ NWheelerCreature::NWheelerCreature(World *world, const Matrix4f& transform): m_w
 
     int old_frame = -1;
 
-    for(int i = 0; i < m_axles; i++) {
+    for (int i = 0; i < m_axles; i++) {
         float x = (float)i * 2.0f;
 
         int frame_start = builder.current_vertex();
@@ -44,18 +45,18 @@ NWheelerCreature::NWheelerCreature(World *world, const Matrix4f& transform): m_w
 
         builder.spring(left_wheel_steering, right_wheel_steering);
 
-        if(i == 1) {
+        if (i == 1) {
             builder.jet(old_frame, frame_start, 120.0f);
             builder.jet(old_frame + 1, frame_start + 1, 120.0f);
         }
 
-        if(i == m_axles - 1) {
+        if (i == m_axles - 1) {
             builder.jet(frame_start, old_frame, 120.0f);
             builder.jet(frame_start + 1, old_frame + 1, 120.0f);
         }
-//
-        if(i > 0) {
-            for(int j = 0; j < 4; j++) {
+        //
+        if (i > 0) {
+            for (int j = 0; j < 4; j++) {
                 builder.spring(old_frame + j, frame_start + j);
             }
 
@@ -97,10 +98,7 @@ void NWheelerCreature::set_controls(Vec3f controls) {
     m_creature->get_jet_objects()[1]->get_physics_jet()->m_force = m_creature->get_jet_objects()[1]->get_max_force() * forward;
     m_creature->get_jet_objects()[2]->get_physics_jet()->m_force = m_creature->get_jet_objects()[2]->get_max_force() * backward;
     m_creature->get_jet_objects()[3]->get_physics_jet()->m_force = m_creature->get_jet_objects()[3]->get_max_force() * backward;
-
-
 }
 
 void NWheelerCreature::set_throttle(float throttle) {
-
 }

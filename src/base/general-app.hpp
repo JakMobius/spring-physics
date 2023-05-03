@@ -1,16 +1,16 @@
 #pragma once
 
+#include <GLFW/glfw3.h>
 #include <etna/vk-wrappers/instance.hpp>
 #include <etna/vk-wrappers/vk-debug-callback-handler.hpp>
-#include <GLFW/glfw3.h>
 
 class GeneralApp {
 
-protected:
-    VK::Instance m_instance {};
-    VK::DebugCallbackHandler m_debug_callback_handler {};
+  protected:
+    VK::Instance m_instance{};
+    VK::DebugCallbackHandler m_debug_callback_handler{};
 
-public:
+  public:
     GeneralApp() = default;
     GeneralApp(const GeneralApp& copy) = delete;
     GeneralApp(GeneralApp&& move) = delete;
@@ -20,7 +20,8 @@ public:
 
     virtual void configure(VK::InstanceFactory& factory) {
         factory.set_app_name("Unnamed app");
-        factory.set_app_version({1, 0, 0});;
+        factory.set_app_version({1, 0, 0});
+        ;
         factory.get_enabled_extension_names() = get_required_instance_extensions();
     }
 
@@ -28,11 +29,11 @@ public:
         glfwInit();
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
-        VK::InstanceFactory factory {};
+        VK::InstanceFactory factory{};
         configure(factory);
         m_instance = factory.create();
 
-        if(!m_debug_callback_handler.listen(m_instance.get_handle())) {
+        if (!m_debug_callback_handler.listen(m_instance.get_handle())) {
             throw std::runtime_error("debug callback handler failed to initialize");
         }
     };
@@ -49,9 +50,17 @@ public:
         return extensions;
     }
 
-    VK::Instance& get_vk_instance() { return m_instance; }
-    VK::DebugCallbackHandler& get_debug_callback_handler() { return m_debug_callback_handler; }
+    VK::Instance& get_vk_instance() {
+        return m_instance;
+    }
+    VK::DebugCallbackHandler& get_debug_callback_handler() {
+        return m_debug_callback_handler;
+    }
 
-    const VK::Instance& get_vk_instance() const { return m_instance; }
-    const VK::DebugCallbackHandler& get_debug_callback_handler() const { return m_debug_callback_handler; }
+    const VK::Instance& get_vk_instance() const {
+        return m_instance;
+    }
+    const VK::DebugCallbackHandler& get_debug_callback_handler() const {
+        return m_debug_callback_handler;
+    }
 };

@@ -13,10 +13,10 @@ void PhysicsSpring::force_tick() {
     delta /= spring_length;
 
     float relative_length = m_target_length / spring_length;
-    if(relative_length < m_low_deformation_length) {
+    if (relative_length < m_low_deformation_length) {
         m_target_length = spring_length * m_low_deformation_length;
         relative_length = m_low_deformation_length;
-    } else if(relative_length > m_high_deformation_length) {
+    } else if (relative_length > m_high_deformation_length) {
         m_target_length = spring_length * m_high_deformation_length;
         relative_length = m_high_deformation_length;
     }

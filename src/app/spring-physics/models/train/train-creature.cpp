@@ -2,7 +2,8 @@
 #include "train-creature.hpp"
 #include "../builder/wheel.hpp"
 
-TrainCreature::TrainCreature(World *world, const Matrix4f& transform): m_world(world) {
+TrainCreature::TrainCreature(World* world, const Matrix4f& transform)
+    : m_world(world) {
     ModelBuilder::Builder builder;
 
     builder.get_state().set_matrix(transform);
@@ -10,7 +11,7 @@ TrainCreature::TrainCreature(World *world, const Matrix4f& transform): m_world(w
     int connection = build_locomotive(builder);
     m_locomotive_end = builder.current_vertex();
 
-    for(int i = 0; i < m_wagons; i++) {
+    for (int i = 0; i < m_wagons; i++) {
         connection = build_wagon(builder, connection);
     }
 
@@ -22,7 +23,7 @@ TrainCreature::TrainCreature(World *world, const Matrix4f& transform): m_world(w
     m_creature->make_visible();
 }
 
-int TrainCreature::build_wagon(ModelBuilder::Builder &builder, int connection) {
+int TrainCreature::build_wagon(ModelBuilder::Builder& builder, int connection) {
     int x = builder.get_vertex_pos(connection)[0] + m_connection_length / 2;
     int front_axis = build_axis(x + 1.0, builder);
     int back_axis = build_axis(x + m_wagon_length, builder);
@@ -49,26 +50,26 @@ int TrainCreature::build_wagon(ModelBuilder::Builder &builder, int connection) {
     return forecourt2;
 }
 
-int TrainCreature::build_locomotive(ModelBuilder::Builder &builder) {
+int TrainCreature::build_locomotive(ModelBuilder::Builder& builder) {
     int old_frame = -1;
 
-    for(int i = 0; i < m_locomotive_axles; i++) {
+    for (int i = 0; i < m_locomotive_axles; i++) {
         float x = (float)i * 2.0f;
         int frame_start = build_axis(x, builder);
 
-        if(i == 1) {
+        if (i == 1) {
             builder.jet(old_frame, frame_start, 120.0f);
             builder.jet(old_frame + 1, frame_start + 1, 120.0f);
         }
 
-        if(i == m_locomotive_axles - 1) {
+        if (i == m_locomotive_axles - 1) {
             builder.jet(frame_start, old_frame, 120.0f);
             builder.jet(frame_start + 1, old_frame + 1, 120.0f);
         }
 
         m_steering_springs.push_back(builder.spring(frame_start + 6, frame_start + 1));
 
-        if(i > 0) {
+        if (i > 0) {
             connect_axles(builder, old_frame, frame_start);
         }
         old_frame = frame_start;
@@ -87,8 +88,8 @@ int TrainCreature::build_locomotive(ModelBuilder::Builder &builder) {
     return forecourt2;
 }
 
-void TrainCreature::connect_axles(ModelBuilder::Builder &builder, int frame_a, int frame_b) {
-    for(int j = 0; j < 4; j++) {
+void TrainCreature::connect_axles(ModelBuilder::Builder& builder, int frame_a, int frame_b) {
+    for (int j = 0; j < 4; j++) {
         builder.spring(frame_a + j, frame_b + j);
     }
 
@@ -100,7 +101,7 @@ void TrainCreature::connect_axles(ModelBuilder::Builder &builder, int frame_a, i
     builder.spring(frame_a + 3, frame_b + 2);
 }
 
-int TrainCreature::build_axis(float x, ModelBuilder::Builder &builder) {
+int TrainCreature::build_axis(float x, ModelBuilder::Builder& builder) {
     int frame_start = builder.current_vertex();
     builder.vertex(x, 2.0f, -m_frame_width);
     builder.vertex(x, 2.0f, m_frame_width);
@@ -151,10 +152,7 @@ void TrainCreature::set_controls(Vec3f controls) {
     m_creature->get_jet_objects()[3]->get_physics_jet()->m_force = m_creature->get_jet_objects()[1]->get_max_force() * forward;
     m_creature->get_jet_objects()[0]->get_physics_jet()->m_force = m_creature->get_jet_objects()[2]->get_max_force() * backward;
     m_creature->get_jet_objects()[1]->get_physics_jet()->m_force = m_creature->get_jet_objects()[3]->get_max_force() * backward;
-
-
 }
 
 void TrainCreature::set_throttle(float throttle) {
-
 }

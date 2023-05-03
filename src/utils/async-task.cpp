@@ -16,14 +16,14 @@ void AsyncTask::wait() {
 }
 
 void AsyncTask::async_task() {
-
 }
 
 void AsyncTask::async_loop() {
-    while(!m_destroyed) {
+    while (!m_destroyed) {
         m_main_semaphore.post();
         m_worker_semaphore.wait();
-        if(m_destroyed) break;
+        if (m_destroyed)
+            break;
 
         async_task();
         atomic_thread_fence(std::memory_order_release);

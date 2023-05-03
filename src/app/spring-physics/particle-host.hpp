@@ -17,7 +17,7 @@ class ParticleHost {
     std::vector<Particle> m_particles;
     Vec3f m_gravity = Vec3f(0, -9.81f, 0);
 
-public:
+  public:
     void tick(float dt) {
         for (int i = 0; i < m_particles.size();) {
             Particle& particle = m_particles[i];
@@ -37,8 +37,8 @@ public:
         }
     }
 
-    void add_particle(const Particle &particle) {
-        if(particle.m_lifetime > 0) {
+    void add_particle(const Particle& particle) {
+        if (particle.m_lifetime > 0) {
             m_particles.push_back(particle);
         }
     }
@@ -50,7 +50,7 @@ public:
     void upload_particles(RenderingContext& context) {
         auto& particle_vertex_buffer = context.m_particle_vertex_buffer;
         particle_vertex_buffer->get_storage().resize(m_particles.size() * 7 * 6);
-        auto *gpu_particles = (ParticleVertex*) particle_vertex_buffer->get_storage().data();
+        auto* gpu_particles = (ParticleVertex*)particle_vertex_buffer->get_storage().data();
 
         float particle_size = 0.1f;
         auto camera = context.m_camera;
@@ -59,12 +59,12 @@ public:
         Vec3f camera_up = camera->get_top() * particle_size;
 
         for (int i = 0; i < m_particles.size(); i++) {
-            const Particle *particle = m_particles.data() + i;
-            ParticleVertex*gpu_particle = gpu_particles + i * 6;
+            const Particle* particle = m_particles.data() + i;
+            ParticleVertex* gpu_particle = gpu_particles + i * 6;
 
             Vec3f position = particle->m_position;
 
-            for(int j = 0; j < 6; j++) {
+            for (int j = 0; j < 6; j++) {
                 memcpy(&gpu_particle[j].r, &particle->m_color, sizeof(float) * 4);
             }
 

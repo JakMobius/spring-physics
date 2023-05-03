@@ -3,9 +3,9 @@
 #include "../../controllable-creature.hpp"
 #include "../builder/model-builder.hpp"
 
-class TrainCreature: public ControllableCreature {
+class TrainCreature : public ControllableCreature {
 
-public:
+  public:
     TrainCreature(World* world, const Matrix4f& transform);
     ~TrainCreature() override = default;
 
@@ -17,8 +17,8 @@ public:
     };
 
     Vec3f get_camera_binding_point() override {
-        Vec3f position {};
-        for(int i = m_locomotive_start; i < m_locomotive_end; i++) {
+        Vec3f position{};
+        for (int i = m_locomotive_start; i < m_locomotive_end; i++) {
             position += m_creature->get_vertices()[i]->get_physics_vertex()->m_position;
         }
         position /= (float)(m_locomotive_end - m_locomotive_start);
@@ -46,9 +46,9 @@ public:
     std::unique_ptr<Creature> m_creature;
     World* m_world;
 
-    int build_wagon(ModelBuilder::Builder &builder, int connection);
-    int build_locomotive(ModelBuilder::Builder &builder);
-    void connect_axles(ModelBuilder::Builder &builder, int frame_a, int frame_b);
+    int build_wagon(ModelBuilder::Builder& builder, int connection);
+    int build_locomotive(ModelBuilder::Builder& builder);
+    void connect_axles(ModelBuilder::Builder& builder, int frame_a, int frame_b);
 
-    int build_axis(float x, ModelBuilder::Builder &builder);
+    int build_axis(float x, ModelBuilder::Builder& builder);
 };

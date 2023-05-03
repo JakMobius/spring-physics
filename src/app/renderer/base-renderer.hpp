@@ -4,12 +4,12 @@
 #include "stages/stage.hpp"
 
 class BaseRenderer {
-public:
-    explicit BaseRenderer() {};
+  public:
+    explicit BaseRenderer(){};
     virtual void initialize();
     virtual void deinitialize();
 
-protected:
+  protected:
     void record_command_buffer(VK::CommandBuffer& command_buffer);
     virtual void prepare_for_frame();
     virtual void handle_swapchain_update();

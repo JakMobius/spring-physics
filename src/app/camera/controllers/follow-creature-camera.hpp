@@ -1,21 +1,22 @@
 #pragma once
 
-#include "camera-controller.hpp"
 #include "../../spring-physics/controllable-creature.hpp"
 #include "../../spring-physics/creatures/creature.hpp"
 #include "../camera.hpp"
+#include "camera-controller.hpp"
 
 class FollowCreatureCamera : public CameraController {
-public:
-    explicit FollowCreatureCamera(Window* window, ControllableCreature *creature): CameraController(window), m_creature(creature) {};
+  public:
+    explicit FollowCreatureCamera(Window* window, ControllableCreature* creature)
+        : CameraController(window), m_creature(creature){};
 
     void on_tick(float delta_time) override;
     Vec3f get_movement();
 
     void on_captured_mouse_move(double dx, double dy) override;
 
-private:
-    ControllableCreature *m_creature;
+  private:
+    ControllableCreature* m_creature;
     float m_speed = 4.0;
     float m_rotation_speed = 2.0;
 

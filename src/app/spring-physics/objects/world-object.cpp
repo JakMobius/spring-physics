@@ -5,4 +5,3 @@
 #include "world-object.hpp"
 #include "../world.hpp"
 #include "vertex-object.hpp"
-

@@ -1,10 +1,10 @@
 
 #include "terrain-polygon.hpp"
-#include "physics-thread.hpp"
-#include "../terrain/terrain.hpp"
 #include "../../../utils/capsule-intersect.hpp"
+#include "../terrain/terrain.hpp"
+#include "physics-thread.hpp"
 
-bool TerrainPolygon::check_hit(const Vec3f &point, const Vec3f &direction, float* distance) const {
+bool TerrainPolygon::check_hit(const Vec3f& point, const Vec3f& direction, float* distance) const {
     // Calculate the distance from the ray origin to the plane
     float t = (m_points[0] - point).dot(m_normal) / direction.dot(m_normal);
 
@@ -24,33 +24,32 @@ bool TerrainPolygon::check_hit(const Vec3f &point, const Vec3f &direction, float
     float u = (dot11 * dot02 - dot01 * dot12) * inv_denom;
     float v = (dot00 * dot12 - dot01 * dot02) * inv_denom;
 
-    if(distance != nullptr) {
+    if (distance != nullptr) {
         *distance = t;
     }
 
     return (u >= 0) && (v >= 0) && (u + v < 1);
 }
 
-bool
-TerrainPolygon::collides(Vec3f ray_origin, Vec3f ray_direction, float distance, float &collision_distance, Vec3f& normal) const {
+bool TerrainPolygon::collides(Vec3f ray_origin, Vec3f ray_direction, float distance, float& collision_distance, Vec3f& normal) const {
 
     Vec3f ray_end = ray_origin + ray_direction * distance;
 
     // Find out distances to the triangle edges and check if the ray nears any of them.
 
-    for(int i = 0; i < 3; i++) {
+    for (int i = 0; i < 3; i++) {
         Vec3f edge_start = m_points[i];
         Vec3f edge_end = m_points[(i + 1) % 3];
 
         float capsule_intersect_distance = capsule_first_intersect(ray_origin, ray_direction, edge_start, edge_end, m_thickness);
         float capsule_distance = dist_point_segment(ray_origin, edge_start, edge_end);
 
-        if(capsule_distance < m_thickness || (capsule_intersect_distance >= 0 && capsule_intersect_distance < distance)) {
+        if (capsule_distance < m_thickness || (capsule_intersect_distance >= 0 && capsule_intersect_distance < distance)) {
             collision_distance = capsule_intersect_distance;
             Vec3f collision = ray_origin + ray_direction * collision_distance;
             // Find out if collision does not have a projection on the triangle.
             // Otherwise, the collision is not valid (it is on the triangle itself)
-            if(!check_hit(collision, m_normal)) {
+            if (!check_hit(collision, m_normal)) {
                 normal = capsule_normal(collision, edge_start, edge_end);
                 return true;
             }
@@ -67,7 +66,7 @@ TerrainPolygon::collides(Vec3f ray_origin, Vec3f ray_direction, float distance, 
 
         bool origin_projects_on_triangle = check_hit(ray_origin, m_normal);
 
-        if(!origin_projects_on_triangle && ray_origin_distance < m_thickness) {
+        if (!origin_projects_on_triangle && ray_origin_distance < m_thickness) {
             // The ray starts from the side of the triangle, so it cannot collide with
             // the triangle itself.
             return false;
@@ -78,7 +77,7 @@ TerrainPolygon::collides(Vec3f ray_origin, Vec3f ray_direction, float distance, 
         float hit_distance = 0.0f;
 
         // Check if ray hits the triangle safe zone boundary
-        if(check_hit(ray_origin - thickness_offset, ray_direction, &hit_distance)) {
+        if (check_hit(ray_origin - thickness_offset, ray_direction, &hit_distance)) {
             collision_distance = hit_distance;
             normal = m_normal;
             return true;
@@ -102,7 +101,7 @@ void TerrainPolygon::set_points(Vec3f point_a, Vec3f point_b, Vec3f point_c) {
 }
 
 TerrainPolygon::~TerrainPolygon() {
-    if(m_terrain) {
+    if (m_terrain) {
         m_terrain->destroy_triangle(this);
     }
 }

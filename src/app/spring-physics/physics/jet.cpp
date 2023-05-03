@@ -1,7 +1,7 @@
 
 #include "jet.hpp"
 
-PhysicsJet::PhysicsJet(PhysicsVertex *head_vertex, PhysicsVertex *tail_vertex) {
+PhysicsJet::PhysicsJet(PhysicsVertex* head_vertex, PhysicsVertex* tail_vertex) {
     m_head_vertex = head_vertex;
     m_tail_vertex = tail_vertex;
 }

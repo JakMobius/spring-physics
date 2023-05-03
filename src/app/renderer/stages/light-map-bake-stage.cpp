@@ -10,19 +10,19 @@ void LightMapBakeStage::create_depth_image() {
     VkExtent3D extent3D{extent.width, extent.height, 1};
 
     auto shading_color_image_factory = Etna::ImageFactory()
-            .set_format(color_format)
-            .set_extent(extent3D)
-            .set_usage(VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT)
-            .set_samples(m_ctx.m_msaa_samples)
-            .set_aspect_mask(VK_IMAGE_ASPECT_COLOR_BIT);
+                                           .set_format(color_format)
+                                           .set_extent(extent3D)
+                                           .set_usage(VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT)
+                                           .set_samples(m_ctx.m_msaa_samples)
+                                           .set_aspect_mask(VK_IMAGE_ASPECT_COLOR_BIT);
     m_color_image = std::make_unique<Etna::Image>(shading_color_image_factory, &window.get_device());
 
     auto shading_depth_image_factory = Etna::ImageFactory()
-            .set_format(depth_format)
-            .set_extent(extent3D)
-            .set_usage(VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT)
-            .set_samples(m_ctx.m_msaa_samples)
-            .set_aspect_mask(VK_IMAGE_ASPECT_DEPTH_BIT);
+                                           .set_format(depth_format)
+                                           .set_extent(extent3D)
+                                           .set_usage(VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT)
+                                           .set_samples(m_ctx.m_msaa_samples)
+                                           .set_aspect_mask(VK_IMAGE_ASPECT_DEPTH_BIT);
     m_depth_image = std::make_unique<Etna::Image>(shading_depth_image_factory, &window.get_device());
 
     m_ctx.m_shadow_color_image = m_color_image.get();
@@ -110,10 +110,9 @@ void LightMapBakeStage::create_graphics_pipeline() {
     push_constant.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
 
     VkDescriptorSetLayout descriptors[]{
-            m_ctx.m_transforms_descriptor_set_layout.get_handle(),
-            m_ctx.m_materials_descriptor_set_layout.get_handle(),
-            m_ctx.m_shadow_mapping_descriptor_set_layout.get_handle()
-    };
+        m_ctx.m_transforms_descriptor_set_layout.get_handle(),
+        m_ctx.m_materials_descriptor_set_layout.get_handle(),
+        m_ctx.m_shadow_mapping_descriptor_set_layout.get_handle()};
     VkPushConstantRange push_constants[]{push_constant};
 
     m_pipeline_layout = VK::PipelineLayout::create(&window.get_device(), descriptors, push_constants);
@@ -127,19 +126,19 @@ void LightMapBakeStage::handle_swapchain_update() {
 }
 
 void LightMapBakeStage::record_command_buffer(VK::CommandBuffer& command_buffer) {
-    VkClearValue clear_values[2] {};
+    VkClearValue clear_values[2]{};
     clear_values[0].color = {{0.0f, 0.0f, 0.0f, 1.0f}};
     clear_values[1].depthStencil = {1.0f, 0};
 
     auto vertex_buffer = m_ctx.m_vertex_buffer.get();
 
     VkDescriptorSet descriptors[]{
-            m_ctx.m_scene_descriptor_set_array->get_descriptor_sets()[0], // transforms
-            m_ctx.m_scene_descriptor_set_array->get_descriptor_sets()[1], // materials
-            m_ctx.m_scene_descriptor_set_array->get_descriptor_sets()[3] // shadow map
+        m_ctx.m_scene_descriptor_set_array->get_descriptor_sets()[0], // transforms
+        m_ctx.m_scene_descriptor_set_array->get_descriptor_sets()[1], // materials
+        m_ctx.m_scene_descriptor_set_array->get_descriptor_sets()[3]  // shadow map
     };
-    VkBuffer vertex_buffers[] = { vertex_buffer->get_buffer()->get_buffer().get_handle() };
-    VkDeviceSize offsets[] = { 0 };
+    VkBuffer vertex_buffers[] = {vertex_buffer->get_buffer()->get_buffer().get_handle()};
+    VkDeviceSize offsets[] = {0};
 
     VK::RenderPassBeginInfo shading_render_pass_begin_info(m_render_pass);
     shading_render_pass_begin_info.set_framebuffer(m_framebuffer);
@@ -157,8 +156,8 @@ void LightMapBakeStage::record_command_buffer(VK::CommandBuffer& command_buffer)
     auto& sizes = m_ctx.m_geometry_pool->get_size_array();
     auto& indices = m_ctx.m_geometry_pool->get_start_indices();
 
-    for(int i = 0; i < sizes.size(); i++) {
-      command_buffer.draw(sizes[i], 1, indices[i], 0);
+    for (int i = 0; i < sizes.size(); i++) {
+        command_buffer.draw(sizes[i], 1, indices[i], 0);
     }
 
     command_buffer.end_render_pass();
@@ -167,7 +166,7 @@ void LightMapBakeStage::record_command_buffer(VK::CommandBuffer& command_buffer)
 }
 
 void LightMapBakeStage::make_texture_readable(VK::CommandBuffer& command_buffer) const {
-    VK::ImageMemoryBarrier barrier { m_color_image->get_image() };
+    VK::ImageMemoryBarrier barrier{m_color_image->get_image()};
     barrier.get_subresource_range().set_aspect_mask(VK_IMAGE_ASPECT_COLOR_BIT);
     barrier.set_layouts(VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
     barrier.set_access_masks(VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT);
@@ -183,8 +182,8 @@ void LightMapBakeStage::update_push_constants() {
     memcpy(&m_push_constants.camera_matrix, &camera_matrix, sizeof(camera_matrix));
     memcpy(&m_push_constants.shadow_camera_matrix, &m_ctx.m_shadow_mapping_matrix.m_data, sizeof(m_ctx.m_shadow_mapping_matrix.m_data));
 
-    m_push_constants.viewport_size[0] = (float) extent.width;
-    m_push_constants.viewport_size[1] = (float) extent.height;
+    m_push_constants.viewport_size[0] = (float)extent.width;
+    m_push_constants.viewport_size[1] = (float)extent.height;
 
     m_push_constants.sun_direction[0] = m_ctx.m_sun_direction.x;
     m_push_constants.sun_direction[1] = m_ctx.m_sun_direction.y;

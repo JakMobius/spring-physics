@@ -4,7 +4,7 @@
 
 class CarCreature : public ControllableCreature {
 
-public:
+  public:
     CarCreature(World* world, const Matrix4f& transform);
     ~CarCreature() override = default;
 
