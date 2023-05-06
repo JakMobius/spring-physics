@@ -174,7 +174,27 @@ struct Vec3 {
     inline explicit operator Vec3<V>() const {
         return Vec3<V>{(V)m_content[0], (V)m_content[1], (V)m_content[2]};
     }
+
+    static Vec3 min(Vec3 a, Vec3 b) {
+        return Vec3{std::min(a.x, b.x), std::min(a.y, b.y), std::min(a.z, b.z)};
+    }
+
+    static Vec3 max(Vec3 a, Vec3 b) {
+        return Vec3{std::max(a.x, b.x), std::max(a.y, b.y), std::max(a.z, b.z)};
+    }
 };
+
+namespace std {
+template<typename T>
+struct hash<Vec3<T>> {
+    size_t operator()(const Vec3<T>& pos) const {
+        size_t x_hash = hash<T>()(pos.x);
+        size_t y_hash = hash<T>()(pos.y);
+        size_t z_hash = hash<T>()(pos.z);
+        return x_hash ^ (y_hash << 1) ^ (z_hash << 2);
+    }
+};
+}
 
 typedef Vec3<double> Vec3d;
 typedef Vec3<float> Vec3f;

@@ -20,6 +20,8 @@ struct SpringConfig {
     float m_damping;
     int m_vertex_a_index;
     int m_vertex_b_index;
+    float m_low_deformation_length;
+    float m_high_deformation_length;
 
     void apply(SpringObject* spring) const;
 };

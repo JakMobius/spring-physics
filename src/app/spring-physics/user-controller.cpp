@@ -22,6 +22,10 @@ void UserController::on_key_press(Window* window, int key, int scancode, int mod
         m_scene->spawn();
     }
 
+    if (key == GLFW_KEY_F3) {
+        m_scene->toggle_metrics_window();
+    }
+
     if (m_scene->get_camera_controller())
         m_scene->get_camera_controller()->on_key_press(key, scancode, mods);
 }

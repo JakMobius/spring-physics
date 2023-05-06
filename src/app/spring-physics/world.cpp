@@ -21,7 +21,9 @@ void World::add_floor() {
     m_floor_material->set_color({0.15, 0.5, 0.2});
     m_floor_material->set_grid(true);
 
-    generator.add_cube({0, -0.05, 0}, {1000, 0.1, 1000}, m_floor_material.get());
+    float floor_level = m_physics_engine->get_floor_level();
+
+    generator.add_cube({0, -0.07f + floor_level, 0}, {1000, 0.1, 1000}, m_floor_material.get());
     m_floor = m_ctx->m_geometry_pool.get()->create_object({generator.get_mesh()}, nullptr);
     generator.reset();
 }
@@ -36,8 +38,4 @@ World::World(RenderingContext* drawer)
 
 World::~World() {
     m_ctx->m_geometry_pool.get()->destroy_material(m_floor_material.get());
-}
-
-std::vector<std::unique_ptr<SurfaceTriangleObject>>& World::get_surface_mesh() {
-    return m_surface_mesh;
 }

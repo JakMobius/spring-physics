@@ -37,7 +37,9 @@ class CarFactory {
         Vec3f up = Vec3f(0, 1, 0);
         Vec3f back = Vec3f(1, 0, 0);
 
-        Vec3f wheel_center = position + direction * length - up * height + back * hub_width / 2;
+        float wheel_down_offset = 0.3;
+
+        Vec3f wheel_center = position + direction * length - up * (height + wheel_down_offset) + back * hub_width / 2;
 
         int wheel_vertex = m_builder.vertex(wheel_center);
         int wheel_vertex_up = m_builder.vertex(wheel_center + up * hub_height);
@@ -55,7 +57,7 @@ class CarFactory {
 
         // Build a steering node
 
-        int body_vertex_steer = m_builder.vertex(position + back * (hub_width / 2) + up * (hub_height / 2));
+        int body_vertex_steer = m_builder.vertex(position + back * hub_width + up * (hub_height / 2));
 
         m_builder.springs_between(body_vertex_steer, body_point, body_point_up);
         m_builder.spring(body_vertex_steer, wheel_vertex_steer);
@@ -67,11 +69,16 @@ class CarFactory {
         m_builder.springs_between(body_point_up, wheel_vertex_up, body_point_up_back);
 
         float strength = m_builder.get_state().m_spring_strength;
-        m_builder.get_state().m_spring_strength = 300;
-        m_builder.get_state().m_spring_damping = 10;
+        m_builder.get_state().m_spring_strength = 20;
+        m_builder.get_state().m_spring_damping = 1.4;
+        m_builder.get_state().m_low_deformation_length = 0.5f;
+        m_builder.get_state().m_high_deformation_length = 2.0f;
 
         m_builder.spring(body_point_up, wheel_vertex);
         m_builder.spring(body_point_up_back, wheel_vertex);
+
+        m_builder.spring(body_point, wheel_vertex_up);
+        m_builder.spring(body_point_back, wheel_vertex_up);
 
         m_builder.get_state().m_spring_strength = strength;
         m_builder.get_state().m_spring_damping = 3;
@@ -90,39 +97,55 @@ class CarFactory {
     void build() {
         // The car is heading in the -x direction
 
-        m_builder.get_state().m_spring_strength = 5000;
+        m_builder.get_state().set_matrix(m_builder.get_state().get_matrix() * Matrix4f::scale_matrix(0.5, 0.5, 0.5));
+
+        m_builder.get_state().m_spring_strength = 3000;
 
         auto matrix = m_builder.get_state().get_matrix();
         auto caster_matrix = Matrix4f::rotation_z_matrix(-0.1f);
 
-        m_builder.get_state().set_matrix(caster_matrix * Matrix4f::translation_matrix(-1.5, 3, -0.7) * matrix);
-        Suspension front_left_suspension = wheel_suspension({}, Vec3f(0, 0, -1), -0.25f, 0.7f);
+        m_builder.get_state().set_matrix(caster_matrix * Matrix4f::translation_matrix(-2.0, 3, -0.7) * matrix);
+        Suspension front_left_suspension = wheel_suspension({}, Vec3f(0, 0, -1), -0.25f, 1.0f);
 
-        m_builder.get_state().set_matrix(caster_matrix * Matrix4f::translation_matrix(1.5, 3, -0.7) * matrix);
-        Suspension back_left_suspension = wheel_suspension({}, Vec3f(0, 0, -1), -0.25f, 0.7f);
+        m_builder.get_state().set_matrix(caster_matrix * Matrix4f::translation_matrix(2.0, 3, -0.7) * matrix);
+        Suspension back_left_suspension = wheel_suspension({}, Vec3f(0, 0, -1), -0.25f, 1.0f);
 
-        m_builder.get_state().set_matrix(caster_matrix * Matrix4f::translation_matrix(-1.5, 3, 0.7) * matrix);
-        Suspension front_right_suspension = wheel_suspension({}, Vec3f(0, 0, 1), -0.25f, 0.7f);
+        m_builder.get_state().set_matrix(caster_matrix * Matrix4f::translation_matrix(-2.0, 3, 0.7) * matrix);
+        Suspension front_right_suspension = wheel_suspension({}, Vec3f(0, 0, 1), -0.25f, 1.0f);
 
-        m_builder.get_state().set_matrix(caster_matrix * Matrix4f::translation_matrix(1.5, 3, 0.7) * matrix);
-        Suspension back_right_suspension = wheel_suspension({}, Vec3f(0, 0, 1), -0.25f, 0.7f);
+        m_builder.get_state().set_matrix(caster_matrix * Matrix4f::translation_matrix(2.0, 3, 0.7) * matrix);
+        Suspension back_right_suspension = wheel_suspension({}, Vec3f(0, 0, 1), -0.25f, 1.0f);
 
         m_builder.get_state().set_matrix(matrix);
 
         // Add four wheels
 
-        m_builder.get_state().m_spring_strength = 300;
-        m_builder.get_state().m_vertex_floor_friction = 2.0f;
+        m_builder.push_state();
+        m_builder.get_state().m_spring_strength = 30;
+        m_builder.get_state().m_vertex_floor_friction = 10.0f;
+        m_builder.get_state().m_low_deformation_length = 0.5f;
+        m_builder.get_state().m_high_deformation_length = 2.0f;
 
-        ModelBuilder::build_wheel(m_builder, front_left_suspension.wheel_anchor1, front_left_suspension.wheel_anchor2,
-                                  1.0f, 16, 0.5);
-        ModelBuilder::build_wheel(m_builder, back_left_suspension.wheel_anchor1, back_left_suspension.wheel_anchor2,
-                                  1.0f, 16, 0.5);
-        ModelBuilder::build_wheel(m_builder, front_right_suspension.wheel_anchor1, front_right_suspension.wheel_anchor2,
-                                  1.0f, 16, 0.5);
-        ModelBuilder::build_wheel(m_builder, back_right_suspension.wheel_anchor1, back_right_suspension.wheel_anchor2,
-                                  1.0f, 16, 0.5);
+        auto wheels = {
+            ModelBuilder::build_wheel(m_builder, front_left_suspension.wheel_anchor1, front_left_suspension.wheel_anchor2,
+                                      0.75f, 16, 0.5),
+            ModelBuilder::build_wheel(m_builder, back_left_suspension.wheel_anchor1, back_left_suspension.wheel_anchor2,
+                                      0.75f, 16, 0.5),
+            ModelBuilder::build_wheel(m_builder, front_right_suspension.wheel_anchor1, front_right_suspension.wheel_anchor2,
+                                      0.75f, 16, 0.5),
+            ModelBuilder::build_wheel(m_builder, back_right_suspension.wheel_anchor1, back_right_suspension.wheel_anchor2,
+                                      0.75f, 16, 0.5)
+        };
 
+        for(auto& wheel : wheels) {
+            int rim1 = wheel.first_rim;
+            int rim2 = (wheel.first_rim + wheel.last_rim + 1) / 2;
+
+            m_builder.jet(rim1, rim1 + 1, 3.0f);
+            m_builder.jet(rim2, rim2 + 1, 3.0f);
+        }
+
+        m_builder.pop_state();
         m_builder.get_state().m_vertex_floor_friction = 0.1f;
         m_builder.get_state().m_spring_strength = 1000;
 
@@ -133,7 +156,7 @@ class CarFactory {
 
         // Connect suspensions together
 
-        m_builder.get_state().m_spring_strength = 500;
+        m_builder.get_state().m_spring_strength = 2000;
 
         m_builder.springs_between(front_left_suspension.body_connections.bottom_front,
                                   front_right_suspension.body_connections.bottom_front,
@@ -177,14 +200,8 @@ class CarFactory {
             back_left_suspension.body_connections.up_front,
             back_left_suspension.body_connections.bottom_front);
 
-        m_front_steering_spring = m_builder.spring(front_left_suspension.body_connections.bottom_front, front_right_suspension.steering_node);
-        m_back_steering_spring = m_builder.spring(back_left_suspension.body_connections.bottom_front, back_right_suspension.steering_node);
-
-        m_builder.jet(back_left_suspension.body_connections.up_back, back_left_suspension.body_connections.up_front, 40.0f);
-        m_builder.jet(back_right_suspension.body_connections.up_back, back_right_suspension.body_connections.up_front, 40.0f);
-
-        m_builder.jet(front_left_suspension.body_connections.up_front, front_left_suspension.body_connections.up_back, 40.0f);
-        m_builder.jet(front_right_suspension.body_connections.up_front, front_right_suspension.body_connections.up_back, 40.0f);
+        m_front_steering_spring = m_builder.spring(front_left_suspension.body_connections.bottom_back, front_right_suspension.steering_node);
+        m_back_steering_spring = m_builder.spring(back_left_suspension.body_connections.bottom_back, back_right_suspension.steering_node);
 
         m_builder.calculate_mass();
     }

@@ -234,6 +234,8 @@ AirplaneCreature::AirplaneCreature(World* world, const Matrix4f& transform)
     builder.get_state().m_spring_strength = 50.0f;
     builder.get_state().m_spring_damping = 0.5f;
     builder.get_state().m_vertex_floor_friction = 1.0f;
+    builder.get_state().m_low_deformation_length = 0.3f;
+    builder.get_state().m_high_deformation_length = 2.0f;
 
     ModelBuilder::build_wheel(builder, 1, 5, 1.5f, 16);
     ModelBuilder::build_wheel(builder, 5, 1, 1.5f, 16);

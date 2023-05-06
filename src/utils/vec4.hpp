@@ -29,7 +29,7 @@ struct Vec4 {
     Vec4<T>()
         : content{0, 0, 0, 0} {};
 
-    explicit Vec4<T>(content4 newContent)
+    Vec4<T>(content4 newContent)
         : content(newContent) {}
 
     Vec4<T>(T x, T y, T z, T w)
@@ -110,6 +110,14 @@ struct Vec4 {
         return {content / k};
     }
 
+    inline Vec4<T> operator&(T k) const {
+        return {content & k};
+    }
+
+    inline Vec4<T> operator|(T k) const {
+        return {content | k};
+    }
+
     inline Vec4<T>& operator+=(const Vec4<T>& second) {
         content += second.content;
         return *this;
@@ -140,6 +148,16 @@ struct Vec4 {
         return *this;
     }
 
+    inline Vec4<T>& operator&=(const T k) {
+        content &= k;
+        return *this;
+    }
+
+    inline Vec4<T>& operator|=(const T k) {
+        content |= k;
+        return *this;
+    }
+
     inline bool operator==(const Vec4<T>& second) const {
         const auto res = content - second.content;
         return (res[0]) < 1e-5 && (res[1]) < 1e-5 && (res[2]) < 1e-5 && res[3] < 1e-5;
@@ -151,5 +169,19 @@ struct Vec4 {
     }
 };
 
+namespace std {
+template<typename T>
+struct hash<Vec4<T>> {
+    size_t operator()(const Vec4<T>& pos) const {
+        size_t x_hash = hash<T>()(pos.x);
+        size_t y_hash = hash<T>()(pos.y);
+        size_t z_hash = hash<T>()(pos.z);
+        size_t w_hash = hash<T>()(pos.w);
+        return x_hash ^ (y_hash << 1) ^ (z_hash << 2) ^ (w_hash << 3);
+    }
+};
+}
+
 typedef Vec4<double> Vec4d;
 typedef Vec4<float> Vec4f;
+typedef Vec4<int> Vec4i;

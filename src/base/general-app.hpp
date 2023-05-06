@@ -1,5 +1,6 @@
 #pragma once
 
+#include <iostream>
 #include <GLFW/glfw3.h>
 #include <etna/vk-wrappers/instance.hpp>
 #include <etna/vk-wrappers/vk-debug-callback-handler.hpp>
@@ -43,6 +44,7 @@ class GeneralApp {
         const char** glfw_extensions = nullptr;
 
         glfw_extensions = glfwGetRequiredInstanceExtensions(&glfw_extension_count);
+
         std::vector<const char*> extensions(glfw_extensions, glfw_extensions + glfw_extension_count);
 
         extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);

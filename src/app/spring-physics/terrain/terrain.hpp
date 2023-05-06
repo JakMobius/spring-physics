@@ -1,27 +1,22 @@
 #pragma once
 
-#include "../objects/surface-triangle-object.hpp"
-#include "terrain-bvh.hpp"
-#include <vector>
+class Terrain;
 
-class World;
+#include "terrain-chunk-bvh.hpp"
+#include "terrain-chunk.hpp"
+#include <unordered_set>
 
 class Terrain {
-    std::vector<TerrainPolygon*> m_surface_mesh{};
+    std::unordered_set<TerrainChunk*> m_chunks;
+    std::vector<TerrainChunk*> m_chunk_vector;
 
-    TerrainBVH m_bvh;
-    bool bvh_valid = false;
+    TerrainChunkBVH m_bvh;
+    bool m_is_valid = false;
 
   public:
-    Terrain() {}
-
-    std::unique_ptr<TerrainPolygon> add_triangle(Vec3f vertex_a, Vec3f vertex_b, Vec3f vertex_c);
-
-    void destroy_triangle(TerrainPolygon* triangle);
-
-    std::vector<TerrainPolygon*>& get_surface_mesh();
-
-    void ensure_valid();
+    std::unique_ptr<TerrainChunk> create_chunk();
+    void destroy_chunk(TerrainChunk* chunk);
 
     void query(const Vec3f& from, const Vec3f& to, std::vector<TerrainPolygon*>& result);
+    void ensure_valid();
 };

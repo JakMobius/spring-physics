@@ -2,6 +2,7 @@
 
 #include "../app/renderer/scene-buffer.hpp"
 #include "../utils/index-pool.hpp"
+#include "../utils/multirange.hpp"
 #include "../utils/vec2.hpp"
 #include "geometry-object-config.hpp"
 #include "geometry-object.hpp"
@@ -17,8 +18,7 @@ class GeometryPool {
     const int material_stride = 8;
     const int transform_stride = 16;
 
-    std::vector<unsigned int> start_indices{};
-    std::vector<unsigned int> size_array{};
+    MultiRange m_vertex_multirange;
 
     // TODO: It seems that these two identical field groups could be wrapped in some nice fancy structures
 
@@ -31,7 +31,7 @@ class GeometryPool {
     std::list<GeometryObject*> m_objects{};
     std::unordered_set<Material*> m_materials{};
 
-    GeometryObject* m_defragmented_elements = nullptr;
+    GeometryObject* m_last_defragmented_element = nullptr;
 
     RenderingContext* m_drawer;
 
@@ -43,24 +43,17 @@ class GeometryPool {
 
     void copy_geometry(int offset, const std::vector<SceneVertex>& vertices, int matrix_index);
 
-    void insert_offsets_to_arrays(int free_index, int buffer_stride);
-    void remove_offset_from_arrays(int offset);
-    void adjust_offset_from_arrays(int offset, int new_offset);
-
     int create_matrix();
     void copy_matrix(int index, const Matrix4f& matrix);
 
   public:
-    const std::vector<unsigned int>& get_start_indices() {
-        return start_indices;
-    };
-    const std::vector<unsigned int>& get_size_array() {
-        return size_array;
-    };
-
-    int get_object_count() {
-        return m_objects.size();
+    MultiRange& get_vertex_multirange() {
+        return m_vertex_multirange;
     }
+
+    const std::list<GeometryObject*>& get_objects() {
+        return m_objects;
+    };
 
     GeometryPool(RenderingContext* drawer);
 

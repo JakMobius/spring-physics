@@ -4,6 +4,7 @@ class GeometryPool;
 
 #include "../utils/matrix4.hpp"
 #include <vector>
+#include <list>
 
 class GeometryObject {
   public:
@@ -26,6 +27,13 @@ class GeometryObject {
     void set_geometry_pool(GeometryPool* pool) {
         m_geometry_pool = pool;
     }
+
+    void set_iterator(typename std::list<GeometryObject*>::iterator iterator) {
+        m_iterator = iterator;
+    }
+
+    GeometryObject* get_prev();
+    GeometryObject* get_next();
 
     int get_vertex_buffer_offset() const {
         return m_vertex_buffer_offset;
@@ -61,19 +69,6 @@ class GeometryObject {
         m_needs_transform_update = needs_update;
     }
 
-    GeometryObject* get_next() const {
-        return m_next;
-    }
-    void set_next(GeometryObject* next) {
-        m_next = next;
-    }
-    GeometryObject* get_prev() const {
-        return m_prev;
-    }
-    void set_prev(GeometryObject* prev) {
-        m_prev = prev;
-    }
-
     std::vector<GeometryObject*>& get_children() {
         return m_children;
     }
@@ -102,10 +97,9 @@ class GeometryObject {
 
     bool m_needs_transform_update = false;
 
-    GeometryObject* m_next = nullptr;
-    GeometryObject* m_prev = nullptr;
-
     std::vector<GeometryObject*> m_children{};
+
+    typename std::list<GeometryObject*>::iterator m_iterator {};
 
     Matrix4f m_transform{};
     Matrix4f m_world_transform{};

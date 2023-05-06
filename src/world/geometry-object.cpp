@@ -63,3 +63,18 @@ GeometryObject::~GeometryObject() {
         m_geometry_pool->destroy_object(this);
     }
 }
+GeometryObject* GeometryObject::get_prev() {
+    if(m_iterator == m_geometry_pool->get_objects().begin()) {
+        return nullptr;
+    }
+    auto prev_iter = std::prev(m_iterator);
+    return *prev_iter;
+}
+
+GeometryObject* GeometryObject::get_next() {
+    auto next_iter = std::next(m_iterator);
+    if(next_iter == m_geometry_pool->get_objects().end()) {
+        return nullptr;
+    }
+    return *next_iter;
+}

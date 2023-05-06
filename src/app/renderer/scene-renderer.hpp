@@ -31,10 +31,11 @@ class SceneRenderer : public BaseRenderer {
         return &m_rendering_context;
     }
 
-  private:
     void draw_frame();
-
     void prepare_for_frame() override;
+
+  private:
+
     void handle_swapchain_update() override;
     void recreate_pipeline();
 
@@ -48,4 +49,6 @@ class SceneRenderer : public BaseRenderer {
     std::unique_ptr<ParticlesStage> m_particles_stage;
     std::unique_ptr<ResolvePresentStage> m_resolve_present_stage;
     std::unique_ptr<ImguiStage> m_imgui_stage;
+
+    bool m_show_metrics_window = false;
 };

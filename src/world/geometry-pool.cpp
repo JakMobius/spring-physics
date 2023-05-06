@@ -19,39 +19,33 @@ void GeometryPool::defragment_single_object(GeometryObject* object, int new_posi
 
     object->set_vertex_buffer_offset(new_position);
 
-    adjust_offset_from_arrays(old_position, new_position);
     memmove(&storage[new_position], &storage[old_position],
             object_buffer_length * sizeof(float));
 
     get_vertex_buffer()->mark_dirty(new_position, new_position + object_buffer_length);
+
+    old_position /= SceneVertex::length;
+    new_position /= SceneVertex::length;
+    object_buffer_length /= SceneVertex::length;
+
+    m_vertex_multirange.remove_interval(old_position, old_position + object_buffer_length);
+    m_vertex_multirange.add_interval(new_position, new_position + object_buffer_length);
+
 }
 
 void GeometryPool::defragment_buffer(int limit) {
-    if (m_defragmented_elements == nullptr)
+    if (m_last_defragmented_element == nullptr)
         return;
 
-    GeometryObject* last_defragmented = m_defragmented_elements;
-    m_defragmented_elements = m_defragmented_elements->get_next();
-
     int free_offset = 0;
-
-    auto prev = last_defragmented->get_prev();
+    auto prev = m_last_defragmented_element->get_prev();
 
     if (prev) {
         free_offset = prev->get_vertex_buffer_length() + prev->get_vertex_buffer_offset();
     }
 
-    if (last_defragmented->get_vertex_buffer_offset() > free_offset) {
-        defragment_single_object(last_defragmented, free_offset);
-        if (!(--limit))
-            return;
-    }
-
-    free_offset = last_defragmented->get_vertex_buffer_offset() +
-                  last_defragmented->get_vertex_buffer_length();
-
-    for (; m_defragmented_elements; m_defragmented_elements = m_defragmented_elements->get_next()) {
-        GeometryObject* next = m_defragmented_elements;
+    for (; m_last_defragmented_element; m_last_defragmented_element = m_last_defragmented_element->get_next()) {
+        GeometryObject* next = m_last_defragmented_element;
 
         if (next->get_vertex_buffer_offset() > free_offset) {
             defragment_single_object(next, free_offset);
@@ -97,31 +91,6 @@ int GeometryPool::allocate_buffer(int size) {
     return free_index;
 }
 
-void GeometryPool::insert_offsets_to_arrays(int free_index, int buffer_stride) {
-    start_indices.push_back(free_index / SceneVertex::length);
-    size_array.push_back(buffer_stride / SceneVertex::length);
-}
-
-void GeometryPool::remove_offset_from_arrays(int offset) {
-    offset /= SceneVertex::length;
-
-    auto array_it = std::lower_bound(start_indices.begin(), start_indices.end(), offset) - start_indices.begin();
-
-    start_indices.erase(start_indices.begin() + array_it);
-    size_array.erase(size_array.begin() + array_it);
-
-    //    std::cout << "Removed array entry on index " << (array_it) << "\n";
-}
-
-void GeometryPool::adjust_offset_from_arrays(int offset, int new_offset) {
-    offset /= SceneVertex::length;
-    new_offset /= SceneVertex::length;
-
-    auto array_it = std::lower_bound(start_indices.begin(), start_indices.end(), offset);
-
-    *array_it = new_offset;
-}
-
 void GeometryPool::destroy_object(GeometryObject* object) {
     for (auto& child : object->get_children()) {
         destroy_object(child);
@@ -131,16 +100,19 @@ void GeometryPool::destroy_object(GeometryObject* object) {
 
     object->get_children().clear();
 
-    auto old_defragmented_handle = m_defragmented_elements;
+    auto old_defragmented_handle = m_last_defragmented_element;
 
-    remove_offset_from_arrays(object->get_vertex_buffer_offset());
+    int from = object->get_vertex_buffer_offset();
+    int to = from + object->get_vertex_buffer_length();
+
+    m_vertex_multirange.remove_interval(from / SceneVertex::length, to / SceneVertex::length);
 
     m_matrix_buffer_index_pool.release_index(object->get_matrix_buffer_index());
 
     //    std::cout << "Deleted object handle on index " << object->m_vertex_buffer_offset << " with stride of " << object->m_vertex_buffer_length << " floats\n";
 
-    if (!old_defragmented_handle || old_defragmented_handle->get_matrix_buffer_index() >= object->get_matrix_buffer_index()) {
-        m_defragmented_elements = object->get_prev();
+    if (!old_defragmented_handle || old_defragmented_handle->get_vertex_buffer_offset() >= object->get_vertex_buffer_offset()) {
+        m_last_defragmented_element = object->get_prev();
     }
 
     m_objects.remove(object);
@@ -157,9 +129,10 @@ std::unique_ptr<GeometryObject> GeometryPool::create_object(const GeometryObject
 
     auto object = std::make_unique<GeometryObject>(this, free_index, buffer_stride, matrix_index, parent);
     m_objects.push_back(object.get());
+    object->set_iterator(std::prev(m_objects.end()));
     object->set_needs_transform_update();
 
-    insert_offsets_to_arrays(free_index, buffer_stride);
+    m_vertex_multirange.add_interval(free_index / SceneVertex::length, (free_index + buffer_stride) / SceneVertex::length);
 
     copy_geometry(free_index, object_config.m_mesh, matrix_index);
 

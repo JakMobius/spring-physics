@@ -12,4 +12,8 @@ class WorldObject {
     virtual ~WorldObject() {}
 
     virtual void tick(float dt) {}
+
+    World* get_world() {
+        return m_world;
+    }
 };

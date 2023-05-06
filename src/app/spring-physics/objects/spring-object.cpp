@@ -4,6 +4,7 @@
 
 #include "spring-object.hpp"
 #include "../../../utils/get-orthogonal.hpp"
+#include "../../../world/shape-generator.hpp"
 #include "../world.hpp"
 
 SpringObject::SpringObject(World* world)

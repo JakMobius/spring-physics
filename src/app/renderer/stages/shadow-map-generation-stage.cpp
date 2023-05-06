@@ -148,11 +148,10 @@ void ShadowMapGenerationStage::record_command_buffer(VK::CommandBuffer& command_
         command_buffer.bind_vertex_buffers(vertex_buffers, offsets);
         command_buffer.bind_descriptor_sets(VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline_layout.get_handle(), descriptors, {});
 
-        auto& sizes = m_ctx.m_geometry_pool->get_size_array();
-        auto& indices = m_ctx.m_geometry_pool->get_start_indices();
+        auto& map = m_ctx.m_geometry_pool->get_vertex_multirange().get_intervals();
 
-        for (int i = 0; i < sizes.size(); i++) {
-            command_buffer.draw(sizes[i], 1, indices[i], 0);
+        for (auto [from, to] : map) {
+            command_buffer.draw(to - from, 1, from, 0);
         }
 
         command_buffer.end_render_pass();

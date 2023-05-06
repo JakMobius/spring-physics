@@ -8,7 +8,7 @@
 
 class MapObject : public WorldObject {
 
-    std::vector<std::unique_ptr<TerrainPolygon>> m_physics_triangles{};
+    std::unique_ptr<TerrainChunk> m_terrain_chunk = nullptr;
     std::unique_ptr<GeometryObject> m_geometry_object = nullptr;
     std::unique_ptr<Material> m_material = nullptr;
 

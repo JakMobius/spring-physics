@@ -5,7 +5,7 @@ include(GNUInstallDirs)
 find_package(Vulkan REQUIRED)
 
 set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_FLAGS "-O0 -g3")
+set(CMAKE_CXX_FLAGS "-O3 -g3 -fsanitize=address")
 
 file(GLOB_RECURSE sources "src/*.cpp" "src/*.hpp")
 add_library(Etna ${sources})

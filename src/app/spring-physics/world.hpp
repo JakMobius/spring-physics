@@ -3,7 +3,6 @@
 #include "../../world/geometry-object.hpp"
 #include "../../world/material.hpp"
 #include "../renderer/rendering-context.hpp"
-#include "objects/surface-triangle-object.hpp"
 #include "objects/world-object.hpp"
 #include "particle-host.hpp"
 #include "physics/physics-engine.hpp"
@@ -15,8 +14,6 @@ class World {
     std::unique_ptr<ParticleHost> m_particle_host{};
     std::unordered_set<WorldObject*> m_objects{};
 
-    std::vector<std::unique_ptr<SurfaceTriangleObject>> m_surface_mesh{};
-
     std::unique_ptr<GeometryObject> m_floor = nullptr;
     std::unique_ptr<Material> m_floor_material = nullptr;
 
@@ -26,8 +23,6 @@ class World {
     World(RenderingContext* drawer);
 
     ~World();
-
-    std::vector<std::unique_ptr<SurfaceTriangleObject>>& get_surface_mesh();
 
     RenderingContext* get_rendering_context() {
         return m_ctx;

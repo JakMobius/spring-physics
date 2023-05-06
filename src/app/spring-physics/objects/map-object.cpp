@@ -33,8 +33,9 @@ void MapObject::create_mesh(const std::string& path, const Matrix4f& transform) 
     std::cout << "Vertex count: " << attrib.vertices.size() << "\n";
 
     GeometryPool* geometry_pool = m_world->get_rendering_context()->m_geometry_pool.get();
-    Terrain* terrain = m_world->get_physics_engine()->get_terrain();
     ShapeGenerator shape_generator;
+
+    m_terrain_chunk = m_world->get_physics_engine()->get_terrain()->create_chunk();
 
     m_material = geometry_pool->create_material();
     m_material->set_color({0.9f, 0.4f, 0.4f});
@@ -54,7 +55,7 @@ void MapObject::create_mesh(const std::string& path, const Matrix4f& transform) 
             point_c *= transform;
 
             shape_generator.add_triangle(point_a, point_b, point_c, m_material.get());
-            m_physics_triangles.push_back(terrain->add_triangle(point_a, point_b, point_c));
+            m_terrain_chunk->add_triangle(point_a, point_b, point_c);
         }
     }
 

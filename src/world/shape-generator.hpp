@@ -60,4 +60,8 @@ class ShapeGenerator {
     void add_sphere(const Vec3f& center, float radius, Material* material, int lod = 1);
 
     void add_vertex(const Vec3f& position, const Vec3f& normal, const Vec2f& uv, Material* material);
+
+    void reserve_vertices(int size) {
+        m_mesh.reserve(size);
+    }
 };

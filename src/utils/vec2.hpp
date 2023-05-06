@@ -178,6 +178,17 @@ struct Vec2 {
     }
 };
 
+namespace std {
+template<typename T>
+struct hash<Vec2<T>> {
+    size_t operator()(const Vec2<T>& pos) const {
+        size_t x_hash = hash<T>()(pos.x);
+        size_t y_hash = hash<T>()(pos.y);
+        return x_hash ^ (y_hash << 1);
+    }
+};
+}
+
 typedef Vec2<double> Vec2d;
 typedef Vec2<float> Vec2f;
 typedef Vec2<int> Vec2i;

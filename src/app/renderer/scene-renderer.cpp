@@ -31,30 +31,13 @@ void SceneRenderer::initialize() {
 void SceneRenderer::prepare_for_frame() {
     BaseRenderer::prepare_for_frame();
 
-    m_rendering_context.m_geometry_pool->defragment_buffer(16);
-    m_rendering_context.m_geometry_pool->update_transforms();
-    m_rendering_context.m_geometry_pool->update_materials();
-}
-
-void SceneRenderer::draw() {
-    prepare_for_frame();
-
     ImGui_ImplVulkan_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    ImGui::ShowDemoWindow();
-
-    ImGui::Begin("Colors");
-    ImGui::ColorEdit3("Ambient color", (float*)&m_rendering_context.m_ambient_color);
-    ImGui::ColorEdit3("Clear color", (float*)&m_rendering_context.m_clear_color);
-    ImGui::ColorEdit3("Fog color", (float*)&m_rendering_context.m_fog_color);
-    ImGui::SliderFloat("Fog amount", (float*)&m_rendering_context.m_fog_amount, 0, 0.1);
-
-    ImGui::End();
-    ImGui::Render();
-
-    draw_frame();
+    m_rendering_context.m_geometry_pool->defragment_buffer(16);
+    m_rendering_context.m_geometry_pool->update_transforms();
+    m_rendering_context.m_geometry_pool->update_materials();
 }
 
 void SceneRenderer::wait_idle() {
@@ -62,6 +45,8 @@ void SceneRenderer::wait_idle() {
 }
 
 void SceneRenderer::draw_frame() {
+    ImGui::Render();
+
     m_rendering_context.m_flight_fence.wait_one();
 
     // Only updating buffers after waiting for the fence to ensure that the

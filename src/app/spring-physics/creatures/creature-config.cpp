@@ -16,6 +16,8 @@ void SpringConfig::apply(SpringObject* spring) const {
     auto physical_body = spring->get_physics_spring();
     physical_body->m_strength = m_strength;
     physical_body->m_damping = m_damping;
+    physical_body->m_low_deformation_length = m_low_deformation_length;
+    physical_body->m_high_deformation_length = m_high_deformation_length;
 }
 
 void MuscleConfig::apply(Muscle* muscle, SpringObject* spring) const {

@@ -13,9 +13,9 @@ class ConcurrentPhysicsEngine {
 
     //    Vec3f m_gravity{0, 0, 0};
     Vec3f m_gravity{0, -9.81, 0};
-    float m_floor_level = 0.2;
+    float m_floor_level = -10.0f;
     float m_dt = 1.0f / 60.0f;
-    int m_substeps_count = 30;
+    int m_substeps_count = 40;
     int m_thread_count = 8;
     bool m_clear_forces = false;
     Terrain m_terrain{};

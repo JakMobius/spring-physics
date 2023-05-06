@@ -6,11 +6,13 @@
 namespace ModelBuilder {
 
 struct BuilderState {
-    float m_frame_weight = 0.0000066f; // Per one strength unit per one meter
+    float m_frame_weight = 0.000002f; // Per one strength unit per one meter
     float m_spring_strength = 1000.0f;
     float m_spring_damping = 3.0f;
     float m_vertex_weight = 0.005f;
     float m_vertex_floor_friction = 0.5f;
+    float m_low_deformation_length = 0.9f;
+    float m_high_deformation_length = 1.1f;
 
     void set_matrix(const Matrix4f& matrix) {
         m_transform = matrix;
@@ -66,7 +68,14 @@ class Builder {
 
     int spring(int a, int b) {
         assert((get_vertex_pos(a) - get_vertex_pos(b)).len_squared() > 0.05f * 0.05f);
-        m_config.m_springs.push_back(SpringConfig{m_state.m_spring_strength, m_state.m_spring_damping, a, b});
+        m_config.m_springs.push_back(SpringConfig{
+            m_state.m_spring_strength,
+            m_state.m_spring_damping,
+            a,
+            b,
+            m_state.m_low_deformation_length,
+            m_state.m_high_deformation_length
+        });
         return m_config.m_springs.size() - 1;
     }
 

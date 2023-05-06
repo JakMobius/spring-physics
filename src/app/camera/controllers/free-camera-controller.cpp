@@ -1,6 +1,5 @@
 
 #include "free-camera-controller.hpp"
-#include <GLFW/glfw3.h>
 
 void FreeCameraController::on_tick(float delta_time) {
     Vec3f camera_space_speed = get_movement() * m_camera_speed * delta_time;
